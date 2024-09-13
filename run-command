@@ -1,0 +1,1 @@
+docker run --name koishop_container -e POSTGRES_USER=sa -e POSTGRES_PASSWORD=12345 -e POSTGRES_DB=koishop_db -p 5432:5432 -d postgres 

@@ -1,0 +1,78 @@
+# Binaries
+*.dll
+*.exe
+*.pdb
+*.mdb
+*.log
+
+# Build directories
+[Bb]in/
+[Oo]bj/
+
+# .NET Core
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# User-specific files
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# ASP.NET Scaffolding
+ScaffoldingReadMe.txt
+
+# StyleCop
+StyleCopReport.xml
+
+# Files built by Visual Studio
+.vscode/
+.vs/
+*.dbmdl
+*.dbproj.schemaview
+*.pfx
+*.publishsettings
+
+# Azure DevOps
+.env
+.vsts-ci.yml
+
+# Others
+._*
+*.swp
+*.swo
+*.tmp
+*~
+
+# Rider
+.idea/
+*.sln.iml
+
+# macOS
+.DS_Store
+
+# Windows image file caches
+Thumbs.db
+ehthumbs.db
+
+# Folder specific for your project
+KoishopBusinessObjects/obj/*
+DTOs/obj/*
+KoishopReositories/obj/*
+KoishopServices/obj/*
+KoishopWebAPI/obj/*
+
+KoishopBusinessObjects/bin/*
+DTOs/bin/*
+KoishopReositories/bin/*
+KoishopServices/bin/*
+KoishopWebAPI/bin/*
+
+# container related dir
+.container/*
+container/*
+*/bin/
+*/obj/
+out
