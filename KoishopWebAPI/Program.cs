@@ -2,7 +2,9 @@ using System.Reflection;
 using System.Text;
 using KoishopBusinessObjects;
 using KoishopRepositories;
+using KoishopServices;
 using KoishopWebAPI.Data;
+using KoishopWebAPI.Extensions;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -52,7 +54,7 @@ builder.Services.AddSwaggerGen(c =>
   var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
   c.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
 });
-builder.Services.AddControllers();
+ 
 builder.Services.AddDbContext<KoishopDBContext>(
     o => o.UseNpgsql(builder.Configuration.GetConnectionString("ConnectionString"), b => b.MigrationsAssembly("KoishopWebAPI")));
 
@@ -80,6 +82,12 @@ builder.Services.AddAuthorization(options =>
   options.AddPolicy("RequireStaffRole", policy => policy.RequireRole("Staff"));
   options.AddPolicy("RequireCustomerRole", policy => policy.RequireRole("Customer"));
 });
+
+builder.Services.AddControllers();
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+builder.Services.AddPersistenceServices(builder.Configuration);
+builder.Services.AddScoped<TokenService>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
