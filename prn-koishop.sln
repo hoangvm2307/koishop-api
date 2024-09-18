@@ -3,13 +3,15 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.33530.505
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KoishopBusinessObjects", "KoishopBusinessObjects\KoishopBusinessObjects.csproj", "{BD5C34D2-D2F9-4494-8F75-0B886D86D588}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KoishopBusinessObjects", "KoishopBusinessObjects\KoishopBusinessObjects.csproj", "{BD5C34D2-D2F9-4494-8F75-0B886D86D588}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KoishopRepositories", "KoishopRepositories\KoishopRepositories.csproj", "{02B2400E-AF28-4C3E-A538-59BF9A7FA481}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KoishopRepositories", "KoishopRepositories\KoishopRepositories.csproj", "{02B2400E-AF28-4C3E-A538-59BF9A7FA481}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KoishopServices", "KoishopServices\KoishopServices.csproj", "{839D1356-AAA0-4C15-BD83-EF71122E5D04}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KoishopServices", "KoishopServices\KoishopServices.csproj", "{839D1356-AAA0-4C15-BD83-EF71122E5D04}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KoishopWebAPI", "KoishopWebAPI\KoishopWebAPI.csproj", "{89987CC6-CDFD-419E-848E-A33D2F3A8D56}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KoishopWebAPI", "KoishopWebAPI\KoishopWebAPI.csproj", "{89987CC6-CDFD-419E-848E-A33D2F3A8D56}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DTOs", "DTOs\DTOs.csproj", "{55ABB73B-ABCD-455D-BDBB-07A7B8E146C4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{89987CC6-CDFD-419E-848E-A33D2F3A8D56}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{89987CC6-CDFD-419E-848E-A33D2F3A8D56}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{89987CC6-CDFD-419E-848E-A33D2F3A8D56}.Release|Any CPU.Build.0 = Release|Any CPU
+		{55ABB73B-ABCD-455D-BDBB-07A7B8E146C4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{55ABB73B-ABCD-455D-BDBB-07A7B8E146C4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{55ABB73B-ABCD-455D-BDBB-07A7B8E146C4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{55ABB73B-ABCD-455D-BDBB-07A7B8E146C4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
