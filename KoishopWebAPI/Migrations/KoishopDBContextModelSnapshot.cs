@@ -54,18 +54,24 @@ namespace KoishopWebAPI.Migrations
                         new
                         {
                             Id = 1,
-                            Name = "Member",
-                            NormalizedName = "MEMBER"
+                            Name = "Guest",
+                            NormalizedName = "GUEST"
                         },
                         new
                         {
                             Id = 2,
+                            Name = "Customer",
+                            NormalizedName = "CUSTOMER"
+                        },
+                        new
+                        {
+                            Id = 3,
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = 3,
+                            Id = 4,
                             Name = "Staff",
                             NormalizedName = "STAFF"
                         });

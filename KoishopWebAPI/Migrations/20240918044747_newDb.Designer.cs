@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace KoishopWebAPI.Migrations
 {
     [DbContext(typeof(KoishopDBContext))]
-    [Migration("20240917134728_first db")]
-    partial class firstdb
+    [Migration("20240918044747_newDb")]
+    partial class newDb
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -57,18 +57,24 @@ namespace KoishopWebAPI.Migrations
                         new
                         {
                             Id = 1,
-                            Name = "Member",
-                            NormalizedName = "MEMBER"
+                            Name = "Guest",
+                            NormalizedName = "GUEST"
                         },
                         new
                         {
                             Id = 2,
+                            Name = "Customer",
+                            NormalizedName = "CUSTOMER"
+                        },
+                        new
+                        {
+                            Id = 3,
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = 3,
+                            Id = 4,
                             Name = "Staff",
                             NormalizedName = "STAFF"
                         });
