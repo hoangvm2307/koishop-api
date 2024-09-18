@@ -1,3 +1,4 @@
+using System.Reflection;
 using System.Text;
 using KoishopBusinessObjects;
 using KoishopRepositories;
@@ -6,6 +7,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,7 +23,35 @@ builder.Services.AddCors(options =>
           .WithExposedHeaders("Pagination")
           .WithOrigins("http://localhost:3000"));
 });
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(c =>
+{
+  var jwtSecurityScheme = new OpenApiSecurityScheme
+  {
+    BearerFormat = "JWT",
+    Name = "Authorization",
+    In = ParameterLocation.Header,
+    Type = SecuritySchemeType.ApiKey,
+    Scheme = JwtBearerDefaults.AuthenticationScheme,
+    Description = "Put Bearer + your token in the box below",
+    Reference = new OpenApiReference
+    {
+      Id = JwtBearerDefaults.AuthenticationScheme,
+      Type = ReferenceType.SecurityScheme
+    }
+  };
 
+  c.AddSecurityDefinition(jwtSecurityScheme.Reference.Id, jwtSecurityScheme);
+
+  c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            jwtSecurityScheme, Array.Empty<string>()
+        }
+    });
+  var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+  c.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
+});
 builder.Services.AddControllers();
 builder.Services.AddDbContext<KoishopDBContext>(
     o => o.UseNpgsql(builder.Configuration.GetConnectionString("ConnectionString"), b => b.MigrationsAssembly("KoishopWebAPI")));
@@ -53,7 +83,12 @@ builder.Services.AddAuthorization(options =>
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-
+app.UseSwagger();
+app.UseSwaggerUI(c =>
+{
+  c.ConfigObject.AdditionalItems.Add("persistAuthorization", "true");
+});
+app.UseCors("AllowLocalhost3000");
 app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();

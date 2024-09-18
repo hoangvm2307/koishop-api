@@ -9,7 +9,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace KoishopWebAPI.Migrations
 {
     /// <inheritdoc />
-    public partial class firstdb : Migration
+    public partial class newDb : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -166,9 +166,10 @@ namespace KoishopWebAPI.Migrations
                 columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
                 values: new object[,]
                 {
-                    { 1, null, "Member", "MEMBER" },
-                    { 2, null, "Admin", "ADMIN" },
-                    { 3, null, "Staff", "STAFF" }
+                    { 1, null, "Guest", "GUEST" },
+                    { 2, null, "Customer", "CUSTOMER" },
+                    { 3, null, "Admin", "ADMIN" },
+                    { 4, null, "Staff", "STAFF" }
                 });
 
             migrationBuilder.CreateIndex(
