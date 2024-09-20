@@ -2,6 +2,7 @@ using System.Reflection;
 using System.Text;
 using KoishopBusinessObjects;
 using KoishopRepositories;
+using KoishopRepositories.DatabaseContext;
 using KoishopServices;
 using KoishopWebAPI.Data;
 using KoishopWebAPI.Extensions;
@@ -54,7 +55,7 @@ builder.Services.AddSwaggerGen(c =>
   var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
   c.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
 });
- 
+
 builder.Services.AddDbContext<KoishopDBContext>(
     o => o.UseNpgsql(builder.Configuration.GetConnectionString("ConnectionString"), b => b.MigrationsAssembly("KoishopWebAPI")));
 
@@ -85,7 +86,8 @@ builder.Services.AddAuthorization(options =>
 
 builder.Services.AddControllers();
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
-builder.Services.AddPersistenceServices(builder.Configuration);
+builder.Services.AddRepositoriesServices(builder.Configuration);
+builder.Services.AddServicesServices();
 builder.Services.AddScoped<TokenService>();
 
 var app = builder.Build();
