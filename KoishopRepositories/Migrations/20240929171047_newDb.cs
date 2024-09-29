@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace KoishopRepositories.Migrations
 {
     /// <inheritdoc />
-    public partial class InitMigration : Migration
+    public partial class newDb : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -30,28 +30,6 @@ namespace KoishopRepositories.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Breeds", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Consignments",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    StartDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    EndDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    ConsignmentType = table.Column<string>(type: "text", nullable: true),
-                    Price = table.Column<decimal>(type: "numeric", nullable: false),
-                    Status = table.Column<string>(type: "text", nullable: true),
-                    DateCreated = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    DateModified = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    isDeleted = table.Column<bool>(type: "boolean", nullable: true),
-                    CreatedBy = table.Column<string>(type: "text", nullable: true),
-                    ModifiedBy = table.Column<string>(type: "text", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Consignments", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -78,6 +56,35 @@ namespace KoishopRepositories.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_User", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Consignments",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    StartDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    EndDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    ConsignmentType = table.Column<string>(type: "text", nullable: true),
+                    Price = table.Column<decimal>(type: "numeric", nullable: false),
+                    Status = table.Column<string>(type: "text", nullable: true),
+                    UserID = table.Column<int>(type: "integer", nullable: false),
+                    DateCreated = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    DateModified = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    isDeleted = table.Column<bool>(type: "boolean", nullable: true),
+                    CreatedBy = table.Column<string>(type: "text", nullable: true),
+                    ModifiedBy = table.Column<string>(type: "text", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Consignments", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Consignments_User_UserID",
+                        column: x => x.UserID,
+                        principalTable: "User",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -284,6 +291,11 @@ namespace KoishopRepositories.Migrations
                 name: "IX_ConsignmentItems_KoiFishId",
                 table: "ConsignmentItems",
                 column: "KoiFishId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Consignments_UserID",
+                table: "Consignments",
+                column: "UserID");
 
             migrationBuilder.CreateIndex(
                 name: "IX_FishCares_KoiFishId",

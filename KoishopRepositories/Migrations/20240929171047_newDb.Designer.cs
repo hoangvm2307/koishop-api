@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace KoishopRepositories.Migrations
 {
     [DbContext(typeof(KoishopContext))]
-    [Migration("20240918224435_InitMigration")]
-    partial class InitMigration
+    [Migration("20240929171047_newDb")]
+    partial class newDb
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -97,10 +97,16 @@ namespace KoishopRepositories.Migrations
                     b.Property<string>("Status")
                         .HasColumnType("text");
 
+                    b.Property<int?>("UserID")
+                        .IsRequired()
+                        .HasColumnType("integer");
+
                     b.Property<bool?>("isDeleted")
                         .HasColumnType("boolean");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("UserID");
 
                     b.ToTable("Consignments");
                 });
@@ -458,6 +464,17 @@ namespace KoishopRepositories.Migrations
                     b.ToTable("User");
                 });
 
+            modelBuilder.Entity("KoishopBusinessObjects.Consignment", b =>
+                {
+                    b.HasOne("KoishopBusinessObjects.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("KoishopBusinessObjects.ConsignmentItem", b =>
                 {
                     b.HasOne("KoishopBusinessObjects.Consignment", "Consignment")
@@ -475,7 +492,7 @@ namespace KoishopRepositories.Migrations
 
             modelBuilder.Entity("KoishopBusinessObjects.FishCare", b =>
                 {
-                    b.HasOne("KoishopBusinessObjects.KoiFish", "Consignment")
+                    b.HasOne("KoishopBusinessObjects.KoiFish", "KoiFish")
                         .WithMany("FishCare")
                         .HasForeignKey("KoiFishId");
 
@@ -483,7 +500,7 @@ namespace KoishopRepositories.Migrations
                         .WithMany()
                         .HasForeignKey("UserId");
 
-                    b.Navigation("Consignment");
+                    b.Navigation("KoiFish");
 
                     b.Navigation("User");
                 });
