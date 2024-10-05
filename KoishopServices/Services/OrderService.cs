@@ -24,6 +24,12 @@ public class OrderService : IOrderService
     public async Task AddOrder(OrderCreationDto orderCreationDto)
     {
         //TODO: Add validation before create and mapping
+        if ( string.IsNullOrEmpty(orderCreationDto.Status))
+        {
+            throw new ArgumentException("Status is required!");
+        }
+        // Total ammount -> tính tiền
+        
         var order = _mapper.Map<Order>(orderCreationDto);
         await _orderRepository.AddAsync(order);
     }

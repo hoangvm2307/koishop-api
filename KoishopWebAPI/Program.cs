@@ -4,8 +4,10 @@ using KoishopBusinessObjects;
 using KoishopRepositories;
 using KoishopRepositories.DatabaseContext;
 using KoishopServices;
+using KoishopWebAPI.Configurations;
 using KoishopWebAPI.Data;
 using KoishopWebAPI.Extensions;
+using KoishopWebAPI.Filters;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -84,9 +86,15 @@ builder.Services.AddAuthorization(options =>
   options.AddPolicy("RequireCustomerRole", policy => policy.RequireRole("Customer"));
 });
 
-builder.Services.AddControllers();
+builder.Services.AddControllers(
+                opt =>
+                {
+                    opt.Filters.Add<ExceptionFilter>();
+                });
+builder.Services.ConfigureProblemDetails();
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddRepositoriesServices(builder.Configuration);
+builder.Services.AddPersistenceServices(builder.Configuration);
 builder.Services.AddServicesServices();
 builder.Services.AddScoped<TokenService>();
 

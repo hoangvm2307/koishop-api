@@ -24,6 +24,26 @@ public class ConsignmentService : IConsignmentService
     public async Task AddConsignment(ConsignmentCreationDto consignmentCreationDto)
     {
         //TODO: Add validation before create and mapping
+        if (consignmentCreationDto.StartDate.Date < DateTime.Now.Date)
+        {
+            throw new ArgumentException("StartDate cannot be in the past.");
+        }
+        if (consignmentCreationDto.EndDate.HasValue && consignmentCreationDto.EndDate.Value.Date < consignmentCreationDto.StartDate.Date)
+        {
+            throw new ArgumentException("EndDate cannot be earlier than StartDate.");
+        }
+        if (string.IsNullOrEmpty(consignmentCreationDto.ConsignmentType))
+        {
+            throw new ArgumentException("ConsignmentType is required.");
+        }
+        if (consignmentCreationDto.Price <= 0)
+        {
+            throw new ArgumentException("Price must be greater than zero.");
+        }
+        if (string.IsNullOrEmpty(consignmentCreationDto.Status))
+        {
+            throw new ArgumentException("Status is required.");
+        }
         var consignment = _mapper.Map<Consignment>(consignmentCreationDto);
         await _consignmentRepository.AddAsync(consignment);
     }
@@ -59,6 +79,26 @@ public class ConsignmentService : IConsignmentService
             return false;
 
         //TODO: Add validation before Update and mapping
+        if (consignmentUpdateDto.StartDate.Date < DateTime.Now.Date)
+        {
+            throw new ArgumentException("StartDate cannot be in the past.");
+        }
+        if (consignmentUpdateDto.EndDate.HasValue && consignmentUpdateDto.EndDate.Value.Date < consignmentUpdateDto.StartDate.Date)
+        {
+            throw new ArgumentException("EndDate cannot be earlier than StartDate.");
+        }
+        if (string.IsNullOrEmpty(consignmentUpdateDto.ConsignmentType))
+        {
+            throw new ArgumentException("ConsignmentType is required.");
+        }
+        if (consignmentUpdateDto.Price <= 0)
+        {
+            throw new ArgumentException("Price must be greater than zero.");
+        }
+        if (string.IsNullOrEmpty(consignmentUpdateDto.Status))
+        {
+            throw new ArgumentException("Status is required.");
+        }
         _mapper.Map(consignmentUpdateDto, existingConsignment);
         await _consignmentRepository.UpdateAsync(existingConsignment);
         return true;

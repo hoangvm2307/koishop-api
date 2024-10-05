@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace KoishopWebAPI.Migrations
 {
     [DbContext(typeof(KoishopDBContext))]
-    [Migration("20240918044747_newDb")]
+    [Migration("20240929171025_newDb")]
     partial class newDb
     {
         /// <inheritdoc />
