@@ -21,6 +21,9 @@ namespace KoishopRepositories
                 new Role { Id = 3, Name = "Admin", NormalizedName = "ADMIN" },
                 new Role { Id = 4, Name = "Staff", NormalizedName = "STAFF" }
             );
+      builder.Entity<User>()
+              .Property(u => u.Id)
+              .ValueGeneratedOnAdd();
     }
   }
 }
