@@ -1,13 +1,11 @@
 ﻿using AutoMapper;
 using DTOs.KoiFish;
 using KoishopBusinessObjects;
+using KoishopBusinessObjects.Constants;
 using KoishopRepositories.Interfaces;
+using KoishopServices.Common.Exceptions;
 using KoishopServices.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Microsoft.AspNetCore.Identity;
 
 namespace KoishopServices.Services;
 
@@ -15,16 +13,45 @@ public class KoiFishService : IKoiFishService
 {
     private readonly IMapper _mapper;
     private readonly IKoiFishRepository _koifishRepository;
+    private readonly UserManager<User> _userManager;
 
-    public KoiFishService(IMapper mapper, IKoiFishRepository koifishRepository)
+    public KoiFishService(IMapper mapper
+        , IKoiFishRepository koifishRepository
+        , UserManager<User> userManager)
     {
         this._mapper = mapper;
+        _userManager = userManager;
         this._koifishRepository = koifishRepository;
     }
     public async Task AddKoiFish(KoiFishCreationDto koifishCreationDto)
     {
-        //TODO: Add validation before create and mapping
+        var user = await _userManager.FindByIdAsync(koifishCreationDto.UserId.Value.ToString());
+        if (user == null)
+        {
+            throw new NotFoundException(ExceptionConstants.USER_NOT_EXIST);
+        }   
+
+        // VALIDATE INPUT CONST
+        if (!new[] { KoiFishGender.MALE, KoiFishGender.FEMALE, KoiFishGender.UNKNOWN }.Contains(koifishCreationDto.Gender))
+        {
+            throw new ValidationException(ExceptionConstants.INVALID_KOIFISH_GENDER);
+        }
+        if (!new[] { KoiFishStatus.AVAILABLE, KoiFishStatus.SOLD, KoiFishStatus.RESERVED }.Contains(koifishCreationDto.Status))
+        {
+            throw new ValidationException(ExceptionConstants.INVALID_KOIFISH_TYPE);
+        }
+        if (!new[] { KoiFishType.PUREIMPORTED, KoiFishType.HYBRIDF1, KoiFishType.PUREVIETNAMESE }.Contains(koifishCreationDto.Type))
+        {
+            throw new ValidationException(ExceptionConstants.INVALID_KOIFISH_TYPE);
+        }
+
+        // VALIDATE PRICE
+        if (koifishCreationDto.Price < 0 || koifishCreationDto.ListPrice < 0)
+        {
+            throw new ValidationException(ExceptionConstants.INVALID_PRICE);
+        }
         var koifish = _mapper.Map<KoiFish>(koifishCreationDto);
+        koifish.UserId = user.Id;
         await _koifishRepository.AddAsync(koifish);
     }
 

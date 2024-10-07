@@ -61,7 +61,7 @@ builder.Services.AddSwaggerGen(c =>
 builder.Services.AddDbContext<KoishopDBContext>(
     o => o.UseNpgsql(builder.Configuration.GetConnectionString("ConnectionString"), b => b.MigrationsAssembly("KoishopWebAPI")));
 
-builder.Services.AddIdentity<User, Role>().AddEntityFrameworkStores<KoishopDBContext>();
+builder.Services.AddIdentity<User, Role>().AddEntityFrameworkStores<KoishopDBContext>().AddDefaultTokenProviders();
 builder.Services.AddAuthentication(options =>
 {
   options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;

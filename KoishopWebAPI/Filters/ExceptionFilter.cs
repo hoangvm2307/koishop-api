@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc;
-using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using System;
 using KoishopServices.Common.Exceptions;
+using ValidationException = KoishopServices.Common.Exceptions.ValidationException;
 
 namespace KoishopWebAPI.Filters
 {
@@ -12,7 +12,15 @@ namespace KoishopWebAPI.Filters
         public void OnException(ExceptionContext context)
         {
             switch (context.Exception)
-            {               
+            {
+                case ValidationException exception:
+                    context.Result = new BadRequestObjectResult(new ProblemDetails
+                    {
+                        Detail = exception.Message
+                    })
+                        .AddContextInformation(context);
+                    context.ExceptionHandled = true;
+                    break;
                 case ForbiddenAccessException:
                     context.Result = new ForbidResult();
                     context.ExceptionHandled = true;

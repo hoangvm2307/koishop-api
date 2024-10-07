@@ -1,5 +1,6 @@
 using DTOs.AccountDtos;
 using KoishopBusinessObjects;
+using KoishopRepositories;
 using KoishopServices.Common.Exceptions;
 using Microsoft.AspNetCore.Identity;
 
@@ -9,9 +10,11 @@ namespace KoishopServices
      {
         private readonly UserManager<User> _userManager;
         private readonly TokenService _tokenService;
+        private readonly KoishopDBContext _context;
 
-        public AccountService(UserManager<User> userManager, TokenService tokenService)
+        public AccountService(KoishopDBContext context, UserManager<User> userManager, TokenService tokenService)
         {
+            _context = context;
             _userManager = userManager;
             _tokenService = tokenService;
         }
@@ -41,15 +44,16 @@ namespace KoishopServices
             {
                 UserName = registerDto.UserName,
                 Email = registerDto.Email,
-                PhoneNumber = registerDto.PhoneNumber
+                PhoneNumber = registerDto.PhoneNumber,
+                SecurityStamp = Guid.NewGuid().ToString()
             };
-            user.SecurityStamp = Guid.NewGuid().ToString();
             var result = await _userManager.CreateAsync(user, registerDto.Password);
-            if (result.Succeeded)
+            if (!result.Succeeded)
             {
-                await _userManager.AddToRoleAsync(user, "Customer");
+                throw new Exception("User registration failed: " + string.Join(", ", result.Errors.Select(e => e.Description)));
             }
-
+            await _userManager.AddToRoleAsync(user, "Customer");
+            _context.SaveChanges();
             return new UserDto
             {
                 Email = user.Email,

@@ -17,8 +17,7 @@ public static class ServicesRegistration
     {
         //TODO: ADD THIS CODE IF HAVE BUG
         //System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
-        services.AddAutoMapper(Assembly.GetExecutingAssembly());    
-        
+        services.AddAutoMapper(Assembly.GetExecutingAssembly());
         services.AddScoped<IBreedService, BreedService>();
         services.AddScoped<IConsignmentItemService, ConsignmentItemService>();
         services.AddScoped<IConsignmentService, ConsignmentService>();
@@ -26,6 +25,7 @@ public static class ServicesRegistration
         services.AddScoped<IKoiFishService, KoiFishService>();
         services.AddScoped<IOrderItemService, OrderItemService>();
         services.AddScoped<IOrderService, OrderService>();
+        services.AddScoped<IRatingService, RatingService>();
 
         return services;
     }
