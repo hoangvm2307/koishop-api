@@ -20,6 +20,11 @@ public class KoiFishController : BaseApiController
         return Ok(koiFishs);
     }
 
+    /// <summary>
+    /// Creates a new koi fish.
+    /// </summary>
+    /// <param name="koiFishCreationDto">The data for the new koi fish.</param>
+    /// <returns>Returns the created koi fish information.</returns>
     [HttpPost]
     public async Task<ActionResult> CreateKoiFish(KoiFishCreationDto koiFishCreationDto)
     {
