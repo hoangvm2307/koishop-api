@@ -1,9 +1,9 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+using KoishopBusinessObjects;
 
-namespace KoishopBusinessObjects;
-
-public class KoiFish : BaseEntity
+namespace DTOs.KoiFishDtos
 {
+  public class KoiFishDto
+  {
     public string? Name { get; set; }
     public string? Origin { get; set; }
     public string? Gender { get; set; } 
@@ -17,14 +17,14 @@ public class KoiFish : BaseEntity
     public string? ImageUrl { get; set; }
     public string? Status { get; set; }
 
-    [ForeignKey(nameof(User))]
     public int? UserId { get; set; } 
     public virtual User? User { get; set; }
-    [ForeignKey(nameof(Breed))]
+
     public int? BreedId { get; set; }
     public virtual Breed? Breed { get; set; }
     public virtual ICollection<OrderItem>? OrderItems { get; set; }
     public virtual ICollection<ConsignmentItem>? ConsignmentItems { get; set; }
     public virtual ICollection<Rating>? Ratings { get; set; }
     public virtual ICollection<FishCare>? FishCare { get; set; }
+  }
 }
