@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace KoishopRepositories.Migrations
 {
     /// <inheritdoc />
-    public partial class newDb : Migration
+    public partial class db_update_v1 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -18,9 +18,9 @@ namespace KoishopRepositories.Migrations
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    BreedName = table.Column<string>(type: "text", nullable: true),
-                    ScreeningRatio = table.Column<string>(type: "text", nullable: true),
-                    Personality = table.Column<string>(type: "text", nullable: true),
+                    BreedName = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    ScreeningRatio = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true),
+                    Personality = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: true),
                     DateCreated = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     DateModified = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     isDeleted = table.Column<bool>(type: "boolean", nullable: true),
@@ -80,11 +80,10 @@ namespace KoishopRepositories.Migrations
                 {
                     table.PrimaryKey("PK_Consignments", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Consignments_User_UserID",
+                        name: "FK_Consignments_AspNetUsers_UserId", // Cập nhật tên FK cho đúng
                         column: x => x.UserID,
-                        principalTable: "User",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalTable: "AspNetUsers", // Chỉ định bảng đúng
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -93,18 +92,18 @@ namespace KoishopRepositories.Migrations
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Name = table.Column<string>(type: "text", nullable: true),
-                    Origin = table.Column<string>(type: "text", nullable: true),
-                    Gender = table.Column<string>(type: "text", nullable: true),
+                    Name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    Origin = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
+                    Gender = table.Column<string>(type: "character varying(10)", maxLength: 10, nullable: true),
                     Age = table.Column<int>(type: "integer", nullable: false),
                     Size = table.Column<decimal>(type: "numeric", nullable: false),
-                    Personality = table.Column<string>(type: "text", nullable: true),
+                    Personality = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: true),
                     DailyFoodAmount = table.Column<decimal>(type: "numeric", nullable: false),
-                    Type = table.Column<string>(type: "text", nullable: true),
+                    Type = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true),
                     Price = table.Column<decimal>(type: "numeric", nullable: false),
                     ListPrice = table.Column<decimal>(type: "numeric", nullable: false),
-                    ImageUrl = table.Column<string>(type: "text", nullable: true),
-                    Status = table.Column<string>(type: "text", nullable: true),
+                    ImageUrl = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: true),
+                    Status = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true),
                     UserId = table.Column<int>(type: "integer", nullable: true),
                     BreedId = table.Column<int>(type: "integer", nullable: true),
                     DateCreated = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
@@ -122,9 +121,9 @@ namespace KoishopRepositories.Migrations
                         principalTable: "Breeds",
                         principalColumn: "Id");
                     table.ForeignKey(
-                        name: "FK_KoiFishes_User_UserId",
+                        name: "FK_KoiFishes_AspNetUsers_UserId",
                         column: x => x.UserId,
-                        principalTable: "User",
+                        principalTable: "AspNetUsers",
                         principalColumn: "Id");
                 });
 
@@ -136,7 +135,7 @@ namespace KoishopRepositories.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     OrderDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     TotalAmount = table.Column<decimal>(type: "numeric", nullable: false),
-                    Status = table.Column<string>(type: "text", nullable: true),
+                    Status = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true),
                     UserId = table.Column<int>(type: "integer", nullable: true),
                     DateCreated = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     DateModified = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
@@ -148,9 +147,9 @@ namespace KoishopRepositories.Migrations
                 {
                     table.PrimaryKey("PK_Orders", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Orders_User_UserId",
+                        name: "FK_Orders_AspNetUsers_UserId",
                         column: x => x.UserId,
-                        principalTable: "User",
+                        principalTable: "AspNetUsers",
                         principalColumn: "Id");
                 });
 
@@ -212,9 +211,9 @@ namespace KoishopRepositories.Migrations
                         principalTable: "KoiFishes",
                         principalColumn: "Id");
                     table.ForeignKey(
-                        name: "FK_FishCares_User_UserId",
+                        name: "FK_FishCares_AspNetUsers_UserId", // Cập nhật tên FK cho đúng
                         column: x => x.UserId,
-                        principalTable: "User",
+                        principalTable: "AspNetUsers", // Chỉ định bảng đúng
                         principalColumn: "Id");
                 });
 
@@ -244,11 +243,10 @@ namespace KoishopRepositories.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Ratings_User_UserId",
+                       name: "FK_Ratings_AspNetUsers_UserId",
                         column: x => x.UserId,
-                        principalTable: "User",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(

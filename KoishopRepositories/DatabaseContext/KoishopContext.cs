@@ -1,4 +1,5 @@
 ﻿using KoishopBusinessObjects;
+using KoishopRepositories.DatabaseContext.Configurations;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -26,8 +27,12 @@ public class KoishopContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.ApplyConfigurationsFromAssembly(typeof(KoishopContext).Assembly);
         base.OnModelCreating(modelBuilder);
+        modelBuilder.ApplyConfiguration(new UserConfigurations());
+        modelBuilder.ApplyConfiguration(new KoiFishConfigurations());
+        modelBuilder.ApplyConfiguration(new OrderConfigurations());
+        modelBuilder.ApplyConfiguration(new BreedConfigurations());
+        ConfigureModel(modelBuilder);
     }
 
     public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
@@ -49,6 +54,11 @@ public class KoishopContext : DbContext
             }
         }
         return base.SaveChangesAsync(cancellationToken);
+    }
+    private void ConfigureModel(ModelBuilder modelBuilder)
+    {
+
+
     }
 
 }

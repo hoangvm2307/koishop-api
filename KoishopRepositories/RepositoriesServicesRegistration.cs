@@ -28,6 +28,7 @@ public static class RepositoriesServicesRegistration
         services.AddScoped<IKoiFishRepository, KoiFishRepository>();
         services.AddScoped<IOrderRepository, OrderRepository>();
         services.AddScoped<IOrderItemRepository, OrderItemRepository>();
+        services.AddScoped<IRatingRepository, RatingRepository>();
 
         return services;
     }
