@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace KoishopRepositories.Migrations
 {
     [DbContext(typeof(KoishopContext))]
-    [Migration("20241007074339_db_update_v1")]
-    partial class db_update_v1
+    [Migration("20241008021537_persistence_db")]
+    partial class persistence_db
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -474,7 +474,10 @@ namespace KoishopRepositories.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("User");
+                    b.ToTable("AspNetUsers", null, t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
                 });
 
             modelBuilder.Entity("KoishopBusinessObjects.Consignment", b =>
