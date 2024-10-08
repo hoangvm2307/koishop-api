@@ -33,7 +33,7 @@ public class KoiFishController : BaseApiController
     /// <param name="koiFishCreationDto">The data for the new koi fish.</param>
     /// <returns>Returns the created koi fish information.</returns>
     [HttpPost]
-    public async Task<ActionResult> CreateKoiFish(KoiFishCreationDto koiFishCreationDto)
+    public async Task<ActionResult> CreateKoiFish([FromBody] KoiFishCreationDto koiFishCreationDto)
     {
         await _koiFishService.AddKoiFish(koiFishCreationDto);
         return CreatedAtAction(nameof(GetKoiFishs), koiFishCreationDto);

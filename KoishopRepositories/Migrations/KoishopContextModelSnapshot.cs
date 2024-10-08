@@ -471,7 +471,10 @@ namespace KoishopRepositories.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("User");
+                    b.ToTable("AspNetUsers", null, t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
                 });
 
             modelBuilder.Entity("KoishopBusinessObjects.Consignment", b =>

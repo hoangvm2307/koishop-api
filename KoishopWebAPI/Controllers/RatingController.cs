@@ -31,7 +31,7 @@ namespace KoishopWebAPI.Controllers
         /// <param name="ratingCreationDto">The data for the new rating.</param>
         /// <returns>Returns the created rating information.</returns>
         [HttpPost]
-        public async Task<ActionResult> CreateRating(RatingCreationDto ratingCreationDto)
+        public async Task<ActionResult> CreateRating([FromBody] RatingCreationDto ratingCreationDto)
         {
             await _ratingRepository.AddRating(ratingCreationDto);
             return CreatedAtAction(nameof(GetRatings), ratingCreationDto);
@@ -43,7 +43,7 @@ namespace KoishopWebAPI.Controllers
         /// <param name="id">The ID of the rating to retrieve.</param>
         /// <returns>Returns the rating if found, otherwise NotFound.</returns>
         [HttpGet("/rating/{id}")]
-        public async Task<ActionResult<RatingDto>> GetRatingById(int id)
+        public async Task<ActionResult<RatingDto>> GetRatingById([FromRoute] int id)
         {
             var rating = await _ratingRepository.GetRatingById(id);
             if (rating == null)
@@ -58,7 +58,7 @@ namespace KoishopWebAPI.Controllers
         /// <param name="ratingUpdateDto">The updated rating data.</param>
         /// <returns>Returns NoContent if successful, otherwise NotFound.</returns>
         [HttpPut("/rating/{id}")]
-        public async Task<ActionResult> UpdateRating(int id, RatingUpdateDto ratingUpdateDto)
+        public async Task<ActionResult> UpdateRating([FromRoute] int id,[FromBody] RatingUpdateDto ratingUpdateDto)
         {
             var isUpdated = await _ratingRepository.UpdateRating(id, ratingUpdateDto);
             if (!isUpdated)
