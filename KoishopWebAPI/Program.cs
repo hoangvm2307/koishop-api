@@ -54,6 +54,7 @@ builder.Services.AddSwaggerGen(c =>
             jwtSecurityScheme, Array.Empty<string>()
         }
     });
+  c.EnableAnnotations();
   var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
   c.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
 });
