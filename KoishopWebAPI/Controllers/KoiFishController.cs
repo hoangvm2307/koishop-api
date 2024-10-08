@@ -1,6 +1,7 @@
-﻿using DTOs.KoiFish;
+﻿using System.Text.Json;
+using DTOs.KoiFish;
+using KoishopRepositories.Repositories.RequestHelpers;
 using KoishopServices.Interfaces;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace KoishopWebAPI.Controllers;
@@ -13,10 +14,16 @@ public class KoiFishController : BaseApiController
         _koiFishService = koiFishService;
     }
 
+    /// <summary>
+    /// Get KoiFish list with paging, sort, search, filter
+    /// </summary>
+    /// <param name="koiFishParams"></param>
+    /// <returns>List KoiFish</returns>
     [HttpGet]
-    public async Task<ActionResult<List<KoiFishDto>>> GetKoiFishs()
+    public async Task<ActionResult<IPagedList<KoiFishDto>>> GetKoiFishs([FromQuery] KoiFishParams koiFishParams)
     {
-        var koiFishs = await _koiFishService.GetListKoiFish();
+        var koiFishs = await _koiFishService.GetListKoiFish(koiFishParams);
+        Response.Headers.Add("Pagination", JsonSerializer.Serialize(koiFishs.MetaData));
         return Ok(koiFishs);
     }
 
@@ -32,6 +39,10 @@ public class KoiFishController : BaseApiController
         return CreatedAtAction(nameof(GetKoiFishs), koiFishCreationDto);
     }
 
+    /// <summary>
+    /// Get a KoiFish by id
+    /// </summary>
+    /// <param name="id"></param>
     [HttpGet("{id}")]
     public async Task<ActionResult<KoiFishDto>> GetKoiFishById(int id)
     {

@@ -1,12 +1,7 @@
 ﻿using AutoMapper;
-using DTOs.FishCare;
 using DTOs.KoiFish;
 using KoishopBusinessObjects;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using KoishopRepositories.Repositories.RequestHelpers;
 
 namespace KoishopServices.Profiles;
 
@@ -17,5 +12,6 @@ public class KoiFishProfile : Profile
         CreateMap<KoiFishDto, KoiFish>().ReverseMap();
         CreateMap<KoiFishCreationDto, KoiFish>();
         CreateMap<KoiFishUpdateDto, KoiFish>();
+        CreateMap<IPagedList<KoiFish>, IPagedList<KoiFishDto>>().ConvertUsing<PagedListConverter<KoiFish, KoiFishDto>>();
     }
 }

@@ -1,16 +1,4 @@
-﻿using DTOs.Breed;
-using DTOs.Consignment;
-using DTOs.ConsignmentItem;
-using DTOs.FishCare;
-using DTOs.OrderItem;
-using DTOs.Rating;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace DTOs.KoiFish;
+﻿namespace DTOs.KoiFish;
 
 public class KoiFishUpdateDto
 {
