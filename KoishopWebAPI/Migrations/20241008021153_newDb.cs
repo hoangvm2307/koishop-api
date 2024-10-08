@@ -9,7 +9,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace KoishopWebAPI.Migrations
 {
     /// <inheritdoc />
-    public partial class db_update_v1 : Migration
+    public partial class newDb : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
