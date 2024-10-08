@@ -1,10 +1,12 @@
-﻿using KoishopBusinessObjects;
+﻿using AutoMapper.QueryableExtensions;
+using KoishopBusinessObjects;
 using KoishopRepositories.DatabaseContext;
 using KoishopRepositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -65,5 +67,198 @@ public class GenericRepository<T> : IGenericRepository<T> where T : BaseEntity
     {
         _context.UpdateRange(entities);
         await _context.SaveChangesAsync();
+    }
+
+    public virtual async Task<T?> FindAsync(
+            Expression<Func<T, bool>> filterExpression,
+            CancellationToken cancellationToken = default)
+    {
+        return await QueryInternal(filterExpression).SingleOrDefaultAsync<T>(cancellationToken);
+    }
+
+    public virtual async Task<T?> FindAsync(
+        Expression<Func<T, bool>> filterExpression,
+        Func<IQueryable<T>, IQueryable<T>> queryOptions,
+        CancellationToken cancellationToken = default)
+    {
+        return await QueryInternal(filterExpression, queryOptions).SingleOrDefaultAsync<T>(cancellationToken);
+    }
+
+    public virtual async Task<List<T>> FindAllAsync(CancellationToken cancellationToken = default)
+    {
+        return await QueryInternal(x => true).ToListAsync<T>(cancellationToken);
+    }
+
+    public virtual async Task<List<T>> FindAllAsync(
+        Expression<Func<T, bool>> filterExpression,
+        CancellationToken cancellationToken = default)
+    {
+        return await QueryInternal(filterExpression).ToListAsync<T>(cancellationToken);
+    }
+
+    public virtual async Task<List<T>> FindAllAsync(
+        Expression<Func<T, bool>> filterExpression,
+        Func<IQueryable<T>, IQueryable<T>> queryOptions,
+        CancellationToken cancellationToken = default)
+    {
+        return await QueryInternal(filterExpression, queryOptions).ToListAsync<T>(cancellationToken);
+    }
+
+    public virtual async Task<IPagedResult<T>> FindAllAsync(
+        int pageNo,
+        int pageSize,
+        CancellationToken cancellationToken = default)
+    {
+        var query = QueryInternal(x => true);
+        return await PagedList<T>.CreateAsync(
+            query,
+            pageNo,
+            pageSize,
+            cancellationToken);
+    }
+
+    public virtual async Task<IPagedResult<T>> FindAllAsync(
+        Expression<Func<T, bool>> filterExpression,
+        int pageNo,
+        int pageSize,
+        CancellationToken cancellationToken = default)
+    {
+        var query = QueryInternal(filterExpression);
+        return await PagedList<T>.CreateAsync(
+            query,
+            pageNo,
+            pageSize,
+            cancellationToken);
+    }
+
+    public virtual async Task<IPagedResult<T>> FindAllAsync(
+        Expression<Func<T, bool>> filterExpression,
+        int pageNo,
+        int pageSize,
+        Func<IQueryable<T>, IQueryable<T>> queryOptions,
+        CancellationToken cancellationToken = default)
+    {
+        var query = QueryInternal(filterExpression, queryOptions);
+        return await PagedList<T>.CreateAsync(
+            query,
+            pageNo,
+            pageSize,
+            cancellationToken);
+    }
+
+    public virtual async Task<int> CountAsync(
+        Expression<Func<T, bool>> filterExpression,
+        CancellationToken cancellationToken = default)
+    {
+        return await QueryInternal(filterExpression).CountAsync(cancellationToken);
+    }
+
+    public bool Any(Expression<Func<T, bool>> filterExpression)
+    {
+        return QueryInternal(filterExpression).Any();
+    }
+
+    public virtual async Task<bool> AnyAsync(
+        Expression<Func<T, bool>> filterExpression,
+        CancellationToken cancellationToken = default)
+    {
+        return await QueryInternal(filterExpression).AnyAsync(cancellationToken);
+    }
+
+    public virtual async Task<T?> FindAsync(
+        Func<IQueryable<T>, IQueryable<T>> queryOptions,
+        CancellationToken cancellationToken = default)
+    {
+        return await QueryInternal(queryOptions).SingleOrDefaultAsync<T>(cancellationToken);
+    }
+
+    public virtual async Task<List<T>> FindAllAsync(
+        Func<IQueryable<T>, IQueryable<T>> queryOptions,
+        CancellationToken cancellationToken = default)
+    {
+        return await QueryInternal(queryOptions).ToListAsync<T>(cancellationToken);
+    }
+
+    public virtual async Task<IPagedResult<T>> FindAllAsync(
+        int pageNo,
+        int pageSize,
+        Func<IQueryable<T>, IQueryable<T>> queryOptions,
+        CancellationToken cancellationToken = default)
+    {
+        var query = QueryInternal(queryOptions);
+        return await PagedList<T>.CreateAsync(
+            query,
+            pageNo,
+            pageSize,
+            cancellationToken);
+    }
+
+    public virtual async Task<int> CountAsync(
+        Func<IQueryable<T>, IQueryable<T>>? queryOptions = default,
+        CancellationToken cancellationToken = default)
+    {
+        return await QueryInternal(queryOptions).CountAsync(cancellationToken);
+    }
+
+    public virtual async Task<bool> AnyAsync(
+        Func<IQueryable<T>, IQueryable<T>>? queryOptions = default,
+        CancellationToken cancellationToken = default)
+    {
+        return await QueryInternal(queryOptions).AnyAsync(cancellationToken);
+    }
+
+    protected virtual IQueryable<T> QueryInternal(Expression<Func<T, bool>>? filterExpression)
+    {
+        var queryable = CreateQuery();
+        if (filterExpression != null)
+        {
+            queryable = queryable.Where(filterExpression);
+        }
+        return queryable;
+    }
+
+    protected virtual IQueryable<TResult> QueryInternal<TResult>(
+        Expression<Func<T, bool>> filterExpression,
+        Func<IQueryable<T>, IQueryable<TResult>> queryOptions)
+    {
+        var queryable = CreateQuery();
+        queryable = queryable.Where(filterExpression);
+        var result = queryOptions(queryable);
+        return result;
+    }
+
+    protected virtual IQueryable<T> QueryInternal(Func<IQueryable<T>, IQueryable<T>>? queryOptions)
+    {
+        var queryable = CreateQuery();
+        if (queryOptions != null)
+        {
+            queryable = queryOptions(queryable);
+        }
+        return queryable;
+    }
+
+    protected virtual IQueryable<T> CreateQuery()
+    {
+        return GetSet();
+    }
+
+    protected virtual DbSet<T> GetSet()
+    {
+        return _context.Set<T>();
+    }
+
+    public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        return await _context.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task<Dictionary<TKey, TValue>> FindAllToDictionaryAsync<TKey, TValue>(
+        Expression<Func<T, bool>> filterExpression,
+        Expression<Func<T, TKey>> keySelector,
+        Expression<Func<T, TValue>> valueSelector,
+        CancellationToken cancellationToken = default)
+    {
+        IQueryable<T> query = _context.Set<T>().Where(filterExpression);
+        return await query.ToDictionaryAsync(keySelector.Compile(), valueSelector.Compile(), cancellationToken);
     }
 }
