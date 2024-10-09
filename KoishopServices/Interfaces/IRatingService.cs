@@ -1,5 +1,7 @@
 ﻿using DTOs.Breed;
 using DTOs.Rating;
+using KoishopServices.Common.Pagination;
+using KoishopServices.Dtos.Rating;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,5 +17,7 @@ namespace KoishopServices.Interfaces
         Task AddRating(RatingCreationDto ratingCreationDto);
         Task<bool> UpdateRating(int id, RatingUpdateDto ratingUpdateDto);
         Task<bool> RemoveRating(int id);
+
+        Task<PagedResult<RatingDto>> FilterRating(FilterRatingDto filterRatingDto, CancellationToken cancellationToken);
     }
 }
