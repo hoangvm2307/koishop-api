@@ -1,6 +1,7 @@
 ﻿using DTOs.AccountDtos;
 using DTOs.KoiFish;
 using KoishopBusinessObjects;
+using KoishopServices.Common.Mapping;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;

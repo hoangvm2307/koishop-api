@@ -1,5 +1,7 @@
 ﻿using DTOs.Breed;
 using DTOs.Rating;
+using KoishopServices.Common.Pagination;
+using KoishopServices.Dtos.Rating;
 using KoishopServices.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -7,11 +9,21 @@ namespace KoishopWebAPI.Controllers
 {
     public class RatingController : BaseApiController
     {
-        private readonly IRatingService _ratingRepository;
+        private readonly IRatingService _ratingService;
 
         public RatingController(IRatingService ratingService)
         {
-            _ratingRepository = ratingService;
+            _ratingService = ratingService;
+        }
+        /// <summary>
+        /// Retrieves a list of all ratings with filter and sorting.
+        /// </summary>
+        /// <returns>List of RatingDto objects.</returns>
+        [HttpGet("filter")]
+        public async Task<ActionResult<PagedResult<RatingDto>>> FilterRating([FromQuery]FilterRatingDto filterRatingDto, CancellationToken cancellationToken = default)
+        {
+            var result = await _ratingService.FilterRating(filterRatingDto, cancellationToken);
+            return Ok(result);
         }
 
         /// <summary>
@@ -21,7 +33,7 @@ namespace KoishopWebAPI.Controllers
         [HttpGet]
         public async Task<ActionResult<List<RatingDto>>> GetRatings()
         {
-            var ratings = await _ratingRepository.GetListRating();
+            var ratings = await _ratingService.GetListRating();
             return Ok(ratings);
         }
 
@@ -33,7 +45,7 @@ namespace KoishopWebAPI.Controllers
         [HttpPost]
         public async Task<ActionResult> CreateRating([FromBody] RatingCreationDto ratingCreationDto)
         {
-            await _ratingRepository.AddRating(ratingCreationDto);
+            await _ratingService.AddRating(ratingCreationDto);
             return CreatedAtAction(nameof(GetRatings), ratingCreationDto);
         }
 
@@ -45,7 +57,7 @@ namespace KoishopWebAPI.Controllers
         [HttpGet("/rating/{id}")]
         public async Task<ActionResult<RatingDto>> GetRatingById([FromRoute] int id)
         {
-            var rating = await _ratingRepository.GetRatingById(id);
+            var rating = await _ratingService.GetRatingById(id);
             if (rating == null)
                 return NotFound();
             return Ok(rating);
@@ -60,7 +72,7 @@ namespace KoishopWebAPI.Controllers
         [HttpPut("/rating/{id}")]
         public async Task<ActionResult> UpdateRating([FromRoute] int id,[FromBody] RatingUpdateDto ratingUpdateDto)
         {
-            var isUpdated = await _ratingRepository.UpdateRating(id, ratingUpdateDto);
+            var isUpdated = await _ratingService.UpdateRating(id, ratingUpdateDto);
             if (!isUpdated)
                 return NotFound();
             return NoContent();
@@ -74,7 +86,7 @@ namespace KoishopWebAPI.Controllers
         [HttpDelete("/rating/{id}")]
         public async Task<ActionResult> DeleteRating(int id)
         {
-            var isDeleted = await _ratingRepository.RemoveRating(id);
+            var isDeleted = await _ratingService.RemoveRating(id);
             if (!isDeleted)
                 return NotFound();
             return NoContent();

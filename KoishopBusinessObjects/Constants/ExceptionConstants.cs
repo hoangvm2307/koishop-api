@@ -22,6 +22,7 @@ namespace KoishopBusinessObjects.Constants
         #endregion
 
         #region Rating exception
+        public const string RATING_NOT_EXIST = "Rating is not existed";
         public const string INVALID_RATING_VALUE = "Invalid rating value! Value must be greater than 0 and less than 5";
         #endregion
     }
