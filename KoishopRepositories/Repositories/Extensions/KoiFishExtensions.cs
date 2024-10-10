@@ -47,14 +47,48 @@ namespace KoishopRepositories.Repositories.Extensions
             if (koiFishParams.MaxAge.HasValue)
                 query = query.Where(k => k.Age <= koiFishParams.MaxAge.Value);
 
-            if (koiFishParams.MinSize.HasValue)
-                query = query.Where(k => k.Size >= koiFishParams.MinSize.Value);
+            // if (koiFishParams.MinSize.HasValue)
+            //     query = query.Where(k => k.Size >= koiFishParams.MinSize.Value);
 
-            if (koiFishParams.MaxSize.HasValue)
-                query = query.Where(k => k.Size <= koiFishParams.MaxSize.Value);
+            // if (koiFishParams.MaxSize.HasValue)
+            //     query = query.Where(k => k.Size <= koiFishParams.MaxSize.Value);
 
             if (!string.IsNullOrEmpty(koiFishParams.Origin))
                 query = query.Where(k => k.Origin.ToLower() == koiFishParams.Origin.ToLower());
+
+
+            if (koiFishParams.Sizes != null && koiFishParams.Sizes.Any())
+            {
+                var lowerCaseSizes = koiFishParams.Sizes.Select(s => s.ToLower()).ToList();
+                var resultList = new List<IQueryable<KoiFish>>();
+
+                foreach (var size in lowerCaseSizes)
+                {
+                    switch (size)
+                    {
+                        case "over_10":
+                            resultList.Add(query.Where(k => k.Size > 10));
+                            break;
+                        case "6_10":
+                            resultList.Add(query.Where(k => k.Size >= 6 && k.Size <= 10));
+                            break;
+                        case "8_12":
+                            resultList.Add(query.Where(k => k.Size >= 6 && k.Size <= 10));
+                            break;
+                        case "under_8":
+                            resultList.Add(query.Where(k => k.Size >= 6 && k.Size <= 10));
+                            break;
+                        case "under_6":
+                            resultList.Add(query.Where(k => k.Size < 6));
+                            break;
+                        default:
+                            break;
+                    }
+                }
+
+                if (resultList.Any())
+                    query = resultList.Aggregate((current, next) => current.Concat(next)).Distinct();
+            }
 
             if (koiFishParams.Genders != null && koiFishParams.Genders.Any())
             {

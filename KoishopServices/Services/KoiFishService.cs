@@ -71,6 +71,22 @@ public class KoiFishService : IKoiFishService
         return _mapper.Map<IPagedList<KoiFishDto>>(koiFishEnity);
     }
 
+    public async Task<FilterKoiFishParamDto> GetFilterParam()
+    {
+        return new FilterKoiFishParamDto {
+            MaxPrice = _koifishRepository.GetMaxPrices(),
+            MinPrice = _koifishRepository.GetMinPrices(),
+            MaxAge = _koifishRepository.GetMaxAge(),
+            MinAge = _koifishRepository.GetMinAges(),
+            Origin = await _koifishRepository.GetDistinctOriginsAsync(),
+            Sizes = _koifishRepository.GetDistinctSizes(),
+            Genders = await _koifishRepository.GetDistinctGendersAsync(),
+            Types = await _koifishRepository.GetDistinctTypesAsync(),
+            Status = await _koifishRepository.GetDistinctStatusAsync(),
+            BreedName = await _koifishRepository.GetDistinctBreedAsync()
+        };
+    }
+
     public async Task<bool> RemoveKoiFish(int id)
     {
         var exist = await _koifishRepository.GetByIdAsync(id);
