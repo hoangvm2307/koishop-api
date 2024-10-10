@@ -28,6 +28,16 @@ public class KoiFishController : BaseApiController
     }
 
     /// <summary>
+    /// Get param filter KoiFish
+    /// </summary>
+    /// <returns></returns>
+    [HttpGet("filter")]
+    public async Task<ActionResult<FilterKoiFishParamDto>> GetFilterKoiFish()
+    {
+        return Ok(await _koiFishService.GetFilterParam());
+    }
+
+    /// <summary>
     /// Creates a new koi fish.
     /// </summary>
     /// <param name="koiFishCreationDto">The data for the new koi fish.</param>
