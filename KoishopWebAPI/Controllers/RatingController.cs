@@ -54,10 +54,10 @@ namespace KoishopWebAPI.Controllers
         /// </summary>
         /// <param name="id">The ID of the rating to retrieve.</param>
         /// <returns>Returns the rating if found, otherwise NotFound.</returns>
-        [HttpGet("/rating/{id}")]
-        public async Task<ActionResult<RatingDto>> GetRatingById([FromRoute] int id)
+        [HttpGet("rating/{id}")]
+        public async Task<ActionResult<RatingDto>> GetRatingById([FromRoute] int id, CancellationToken cancellationToken = default)
         {
-            var rating = await _ratingService.GetRatingById(id);
+            var rating = await _ratingService.GetRatingById(id, cancellationToken);
             if (rating == null)
                 return NotFound();
             return Ok(rating);
@@ -69,7 +69,7 @@ namespace KoishopWebAPI.Controllers
         /// <param name="id">The ID of the rating to update.</param>
         /// <param name="ratingUpdateDto">The updated rating data.</param>
         /// <returns>Returns NoContent if successful, otherwise NotFound.</returns>
-        [HttpPut("/rating/{id}")]
+        [HttpPut("rating/{id}")]
         public async Task<ActionResult> UpdateRating([FromRoute] int id,[FromBody] RatingUpdateDto ratingUpdateDto)
         {
             var isUpdated = await _ratingService.UpdateRating(id, ratingUpdateDto);
@@ -83,7 +83,7 @@ namespace KoishopWebAPI.Controllers
         /// </summary>
         /// <param name="id">The ID of the rating to delete.</param>
         /// <returns>Returns NoContent if successful, otherwise NotFound.</returns>
-        [HttpDelete("/rating/{id}")]
+        [HttpDelete("rating/{id}")]
         public async Task<ActionResult> DeleteRating(int id)
         {
             var isDeleted = await _ratingService.RemoveRating(id);
