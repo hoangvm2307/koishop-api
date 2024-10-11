@@ -18,7 +18,7 @@ public class RatingDto
     public string? Comment { get; set; }
 
     public int UserId { get; set; }
-    public virtual UserDto? User { get; set; }
+    public virtual UserDto? UserDto { get; set; }
     public int KoiFishId { get; set; }
-    public virtual KoiFishDto? KoiFish { get; set; }
+    public virtual KoiFishDto? KoiFishDto { get; set;}
 }

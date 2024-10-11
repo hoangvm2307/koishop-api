@@ -85,12 +85,13 @@ namespace KoishopServices.Services
                 return query;
             };
             var result = await _ratingRepository.FindAllAsync(filterRatingDto.PageNumber, filterRatingDto.PageSize, queryOptions, cancellationToken);
+            
             return PagedResult<RatingDto>.Create(
                 totalCount: result.TotalCount,
                 pageCount: result.PageCount,
                 pageSize: result.PageSize,
                 pageNumber: result.PageNo,
-                data: _mapper.Map<List<RatingDto>>(result));
+                data: result.MapToRatingDtoList(_mapper));
         }
 
         public async Task<IEnumerable<RatingDto>> GetListRating()
@@ -100,12 +101,13 @@ namespace KoishopServices.Services
             return result;
         }
 
-        public async Task<RatingDto> GetRatingById(int id)
+        public async Task<RatingDto> GetRatingById(int id, CancellationToken cancellationToken)
         {
-            var rating = await _ratingRepository.GetByIdAsync(id);
+            var rating = await _ratingRepository.FindAsync(x => x.Id == id, q => q.Include(f => f.KoiFish)
+                                                                                    .Include(u => u.User), cancellationToken);
             if (rating == null)
                 return null;
-            return _mapper.Map<RatingDto>(rating);
+            return rating.MapToRatingDto(_mapper);
         }
 
         public async Task<bool> RemoveRating(int id)
