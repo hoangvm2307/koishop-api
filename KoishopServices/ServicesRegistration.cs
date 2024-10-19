@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Reflection;
 using KoishopServices.Interfaces;
 using KoishopServices.Services;
+using KoishopServices.Interfaces.Third_Party;
 
 namespace KoishopServices;
 
@@ -26,7 +27,7 @@ public static class ServicesRegistration
         services.AddScoped<IOrderItemService, OrderItemService>();
         services.AddScoped<IOrderService, OrderService>();
         services.AddScoped<IRatingService, RatingService>();
-
+        services.AddScoped<IVnPayService, VnPayService>();
         return services;
     }
 }
