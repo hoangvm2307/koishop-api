@@ -15,12 +15,6 @@ namespace DTOs.OrderItem;
 public class OrderItemCreationDto
 {
     /// <summary>
-    /// The quantity of the specific KoiFish being ordered.
-    /// </summary>
-    [SwaggerSchema(Description = "The quantity of the specific KoiFish being ordered.")]
-    public int Quantity { get; set; }
-
-    /// <summary>
     /// The ID of the KoiFish being ordered. This can be null if not yet assigned.
     /// </summary>
     [SwaggerSchema(Description = "The ID of the KoiFish being ordered. This can be null if not yet assigned.")]

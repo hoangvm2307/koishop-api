@@ -9,7 +9,6 @@ namespace KoishopBusinessObjects;
 
 public class OrderItem : BaseEntity
 {
-    public int Quantity { get; set; }
     public decimal Price { get; set; }
 
     [ForeignKey(nameof(Order))]
