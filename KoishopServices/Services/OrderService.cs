@@ -1,10 +1,12 @@
 ﻿using AutoMapper;
+using DTOs.KoiFish;
 using DTOs.Order;
 using KoishopBusinessObjects;
 using KoishopBusinessObjects.Constants;
 using KoishopBusinessObjects.VnPayModel;
 using KoishopRepositories.Interfaces;
 using KoishopServices.Common.Exceptions;
+using KoishopServices.Dtos.Order;
 using KoishopServices.Interfaces;
 using KoishopServices.Interfaces.Third_Party;
 using Microsoft.AspNetCore.Http;
@@ -44,7 +46,7 @@ public class OrderService : IOrderService
         this._vnPayService = vnPayService;
         this._httpContextAccessor = httpContextAccessor;
     }
-    public async Task<string> AddOrder(OrderCreationDto orderCreationDto)
+    public async Task<string> AddOrder(OrderCreationDto orderCreationDto, CancellationToken cancellationToken)
     {
         //TODO: Add validation before create and mapping
         var customer = await _userManager.FindByIdAsync(orderCreationDto.UserId.ToString());
@@ -58,7 +60,7 @@ public class OrderService : IOrderService
         List<OrderItem> orderItems = new List<OrderItem>();
         foreach(var orderItemDto in orderCreationDto.OrderItemCreationDtos)
         {
-            var koiFish = await _koiFishRepository.FindAsync(x => x.Id == orderItemDto.KoiFishId && x.isDeleted == false);
+            var koiFish = await _koiFishRepository.FindAsync(x => x.Id == orderItemDto.KoiFishId && x.isDeleted == false, cancellationToken);
             if (koiFish == null)
             {
                 throw new NotFoundException(ExceptionConstants.KOIFISH_NOT_EXIST + orderItemDto.KoiFishId);
@@ -73,6 +75,7 @@ public class OrderService : IOrderService
             orderItems.Add(orderItem);
         }
         order.OrderItems = orderItems;
+        order.Quantity = orderItems.Count;
         foreach (var orderItem in orderItems)
         {
             await _orderItemRepository.AddAsync(orderItem);
@@ -123,6 +126,61 @@ public class OrderService : IOrderService
         //TODO: Add validation before Update and mapping
         _mapper.Map(orderUpdateDto, existingOrder);
         await _orderRepository.UpdateAsync(existingOrder);
+        return true;
+    }
+
+    public async Task<bool> AfterPaymentSuccess(int id, CancellationToken cancellationToken)
+    {
+        var order = await _orderRepository.FindAsync(x => x.Id ==  id && x.isDeleted == false, cancellationToken);
+        if (order == null)
+        {
+            throw new NotFoundException(ExceptionConstants.ORDER_NOT_EXIST + id);
+        }
+        if (order.Status != OrderStatus.PENDING)
+        {
+            throw new ValidationException(ExceptionConstants.INVALID_ORDER_STATUS);
+        }
+        List<KoiFish> koifishes = new List<KoiFish>();
+        var orderItems = await _orderItemRepository.FindAllAsync(x => x.OrderId == order.Id && x.isDeleted == false, cancellationToken);
+        foreach (var orderItem in orderItems)
+        {
+            var koifish = await _koiFishRepository.FindAsync(x => x.Id == orderItem.KoiFishId && x.isDeleted == false, cancellationToken);
+            // Note: thông thường, nếu Order Item tồn tại mà con cá mất tiu -> phải refund vì đã thanh toán rồi mới gọi API này
+            if (koifish == null)
+            {
+                throw new NotFoundException(ExceptionConstants.KOIFISH_NOT_EXIST + orderItem.KoiFishId);
+            }
+            if (koifish.Status != KoiFishStatus.AVAILABLE)
+            {
+                throw new ValidationException(ExceptionConstants.INVALID_KOIFISH_STATUS);
+            }           
+            koifishes.Add(koifish);
+        }
+        foreach (var koi in koifishes)
+        {
+            koi.Status = KoiFishStatus.SOLD;
+            koi.DateModified = DateTime.Now;
+            await _koiFishRepository.UpdateAsync(koi);
+        }
+        order.Status = OrderStatus.PROCESSING;
+        order.DateModified = DateTime.Now;
+        await _orderRepository.UpdateAsync(order);
+        return true;
+    }
+
+    public async Task<bool> UpdateOrderStatus(OrderStatusUpdateDto orderStatusUpdateDto, CancellationToken cancellationToken)
+    {
+        if (!new[] { OrderStatus.PENDING, OrderStatus.PROCESSING, OrderStatus.DELIVERING, OrderStatus.DELIVERED, OrderStatus.CANCELLED }.Contains(orderStatusUpdateDto.Status))
+        {
+            throw new ValidationException(ExceptionConstants.INVALID_ORDER_STATUS);
+        }
+        var order = await _orderRepository.FindAsync(x => x.Id ==  orderStatusUpdateDto.Id && x.isDeleted == false, cancellationToken);
+        if (order == null)
+        {
+            throw new NotFoundException(ExceptionConstants.ORDER_NOT_EXIST + orderStatusUpdateDto.Id);
+        }
+        order.Status = orderStatusUpdateDto.Status;
+        await _orderRepository.UpdateAsync(order);
         return true;
     }
 }

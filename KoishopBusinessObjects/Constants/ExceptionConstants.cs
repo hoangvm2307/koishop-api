@@ -29,6 +29,7 @@ namespace KoishopBusinessObjects.Constants
         #region
         public const string INVALID_ORDER_STATUS = "Invalid order status";
         public const string INVALID_ORDER_TOTAL_AMOUNT = "Invalid total amount";
+        public const string ORDER_NOT_EXIST = "Order is not existed: ";
         #endregion
     }
 }

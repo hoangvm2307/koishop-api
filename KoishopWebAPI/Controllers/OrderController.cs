@@ -1,4 +1,5 @@
 ﻿using DTOs.Order;
+using KoishopServices.Dtos.Order;
 using KoishopServices.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -29,11 +30,13 @@ public class OrderController : BaseApiController
     /// Creates a new order.
     /// </summary>
     /// <param name="orderCreationDto">The data transfer object that contains the order creation details.</param>
+    /// <param name="cancellationToken"></param>
     /// <returns>VnPay payment URL or error.</returns>
     [HttpPost]
-    public async Task<ActionResult<JsonResponse<string>>> CreateOrder([FromBody] OrderCreationDto orderCreationDto)
+    public async Task<ActionResult<JsonResponse<string>>> CreateOrder([FromBody] OrderCreationDto orderCreationDto
+        , CancellationToken cancellationToken = default)
     {
-        var result = await _orderService.AddOrder(orderCreationDto);
+        var result = await _orderService.AddOrder(orderCreationDto, cancellationToken);
         return Ok(new JsonResponse<string>(result));
     }
 
@@ -77,6 +80,36 @@ public class OrderController : BaseApiController
         var isDeleted = await _orderService.RemoveOrder(id);
         if (!isDeleted)
             return NotFound();
+        return NoContent();
+    }
+
+    /// <summary>
+    /// Handles the logic after a successful payment through VnPay for the order with the given ID.
+    /// </summary>
+    /// <param name="id">The ID of the order to update after payment success.</param>
+    /// <param name="cancellationToken">Token to cancel the operation (optional).</param>
+    /// <returns>Returns NoContent if successful, or BadRequest if the operation fails.</returns>
+    [HttpPut("order/{id}/payment-success")]
+    public async Task<ActionResult> AfterPaymentSuccess(int id, CancellationToken cancellationToken = default)
+    {
+        var afterPaymentSuccess = await _orderService.AfterPaymentSuccess(id, cancellationToken);
+        if (!afterPaymentSuccess)
+            return BadRequest();
+        return NoContent();
+    }
+
+    /// <summary>
+    /// Updates the status of the order based on the provided status update details.
+    /// </summary>
+    /// <param name="orderStatusUpdateDto">Data Transfer Object containing the new order status and id.</param>
+    /// <param name="cancellationToken">Token to cancel the operation (optional).</param>
+    /// <returns>Returns NoContent if successful, or BadRequest if the operation fails.</returns>
+    [HttpPatch("order/status")]
+    public async Task<ActionResult> UpdateOrderStatus(OrderStatusUpdateDto orderStatusUpdateDto, CancellationToken cancellationToken = default)
+    {
+        var afterPaymentSuccess = await _orderService.UpdateOrderStatus(orderStatusUpdateDto, cancellationToken);
+        if (!afterPaymentSuccess)
+            return BadRequest();
         return NoContent();
     }
 }

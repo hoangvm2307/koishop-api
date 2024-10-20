@@ -10,7 +10,7 @@ public static class OrderStatus
 {
     public const string PENDING = "Pending";
     public const string PROCESSING = "Processing";
-    public const string SHIPPED = "Shipped";
+    public const string DELIVERING = "Delivering";
     public const string DELIVERED = "Delivered";
     public const string CANCELLED = "Cancelled";
 }

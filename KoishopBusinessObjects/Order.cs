@@ -9,6 +9,7 @@ namespace KoishopBusinessObjects;
 
 public class Order : BaseEntity
 {
+    public int Quantity { get; set; } // Count số item
     public DateTime OrderDate { get; set; } = DateTime.Now;
     public decimal TotalAmount { get; set; }
     public string? Status { get; set; }
