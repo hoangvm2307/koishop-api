@@ -3,6 +3,7 @@ using DTOs.KoiFish;
 using KoishopBusinessObjects;
 using KoishopBusinessObjects.Constants;
 using KoishopRepositories.Interfaces;
+using KoishopRepositories.Repositories.RequestHelpers;
 using KoishopServices.Common.Exceptions;
 using KoishopServices.Interfaces;
 using Microsoft.AspNetCore.Identity;
@@ -57,17 +58,33 @@ public class KoiFishService : IKoiFishService
 
     public async Task<KoiFishDto> GetKoiFishById(int id)
     {
-        var koifish = await _koifishRepository.GetByIdAsync(id);
+        var koifish = await _koifishRepository.GetKoiFishDetail(id);
         if (koifish == null)
             return null;
         return _mapper.Map<KoiFishDto>(koifish);
     }
 
-    public async Task<IEnumerable<KoiFishDto>> GetListKoiFish()
+    public async Task<IPagedList<KoiFishDto>> GetListKoiFish(KoiFishParams koiFishParams)
     {
-        var koifishs = await _koifishRepository.GetAllAsync();
-        var result = _mapper.Map<List<KoiFishDto>>(koifishs);
-        return result;
+        var query = await _koifishRepository.GetKoiFishs(koiFishParams);
+        var koiFishEnity = await PagedList<KoiFish>.ToPagedList(query, koiFishParams.PageNumber, koiFishParams.PageSize);
+        return _mapper.Map<IPagedList<KoiFishDto>>(koiFishEnity);
+    }
+
+    public async Task<FilterKoiFishParamDto> GetFilterParam()
+    {
+        return new FilterKoiFishParamDto {
+            MaxPrice = _koifishRepository.GetMaxPrices(),
+            MinPrice = _koifishRepository.GetMinPrices(),
+            MaxAge = _koifishRepository.GetMaxAge(),
+            MinAge = _koifishRepository.GetMinAges(),
+            Origin = await _koifishRepository.GetDistinctOriginsAsync(),
+            Sizes = _koifishRepository.GetDistinctSizes(),
+            Genders = await _koifishRepository.GetDistinctGendersAsync(),
+            Types = await _koifishRepository.GetDistinctTypesAsync(),
+            Status = await _koifishRepository.GetDistinctStatusAsync(),
+            BreedName = await _koifishRepository.GetDistinctBreedAsync()
+        };
     }
 
     public async Task<bool> RemoveKoiFish(int id)

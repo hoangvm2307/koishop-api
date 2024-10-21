@@ -23,7 +23,7 @@ public class BreedController : BaseApiController
     }
 
     [HttpPost]
-    public async Task<ActionResult> CreateBreed(BreedCreationDto breedCreationDto)
+    public async Task<ActionResult> CreateBreed([FromForm] BreedCreationDto breedCreationDto)
     {
         await _breedService.AddBreed(breedCreationDto);
         return CreatedAtAction(nameof(GetBreeds), breedCreationDto);

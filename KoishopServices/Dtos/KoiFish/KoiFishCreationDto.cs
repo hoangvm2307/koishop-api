@@ -1,15 +1,4 @@
-﻿using DTOs.Breed;
-using DTOs.Consignment;
-using DTOs.FishCare;
-using DTOs.OrderItem;
-using DTOs.Rating;
-using KoishopBusinessObjects;
-using Swashbuckle.AspNetCore.Annotations;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Swashbuckle.AspNetCore.Annotations;
 
 namespace DTOs.KoiFish;
 

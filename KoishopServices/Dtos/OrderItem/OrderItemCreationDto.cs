@@ -1,5 +1,6 @@
 ﻿using DTOs.KoiFish;
 using DTOs.Order;
+using Swashbuckle.AspNetCore.Annotations;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,12 +9,14 @@ using System.Threading.Tasks;
 
 namespace DTOs.OrderItem;
 
+/// <summary>
+/// DTO for creating a new Order Item
+/// </summary>
 public class OrderItemCreationDto
 {
-    public int Id { get; set; }
-    public int Quantity { get; set; }
-    public decimal Price { get; set; }
-
-    public int? OrderId { get; set; }
+    /// <summary>
+    /// The ID of the KoiFish being ordered. This can be null if not yet assigned.
+    /// </summary>
+    [SwaggerSchema(Description = "The ID of the KoiFish being ordered. This can be null if not yet assigned.")]
     public int? KoiFishId { get; set; }
 }
