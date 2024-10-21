@@ -26,7 +26,7 @@ builder.Services.AddCors(options =>
           .AllowAnyMethod()
           .AllowCredentials()
           .WithExposedHeaders("Pagination")
-          .WithOrigins("http://localhost:3000"));
+          .WithOrigins("http://localhost:3001"));
 });
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
@@ -90,7 +90,7 @@ builder.Services.AddAuthorization(options =>
 builder.Services.AddControllers(
                 opt =>
                 {
-                    opt.Filters.Add<ExceptionFilter>();
+                  opt.Filters.Add<ExceptionFilter>();
                 });
 builder.Services.ConfigureProblemDetails();
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
@@ -113,12 +113,13 @@ app.UseAuthorization();
 app.MapControllers();
 
 var scope = app.Services.CreateScope();
-var context = scope.ServiceProvider.GetRequiredService<KoishopDBContext>();
+var identityContext = scope.ServiceProvider.GetRequiredService<KoishopDBContext>();
+var persistenceContext = scope.ServiceProvider.GetRequiredService<KoishopContext>();
 var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
 var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
 try
 {
-  await DBInitializer.Initialize(context, userManager);
+  await DBInitializer.Initialize(identityContext, persistenceContext, userManager);
 }
 catch (Exception ex)
 {
