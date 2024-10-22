@@ -1,6 +1,7 @@
 ﻿using DTOs.Order;
 using DTOs.OrderItem;
 using KoishopBusinessObjects;
+using KoishopServices.Common.Pagination;
 using KoishopServices.Dtos.Order;
 using System;
 using System.Collections.Generic;
@@ -19,4 +20,5 @@ public interface IOrderService
     Task<bool> RemoveOrder(int id);
     Task<bool> AfterPaymentSuccess(int id, CancellationToken cancellationToken);
     Task<bool> UpdateOrderStatus(OrderStatusUpdateDto orderStatusUpdateDto, CancellationToken cancellationToken);
+    Task<PagedResult<OrderDto>> GetOrderByUserId(FilterOrderDto filterOrderDto, CancellationToken cancellationToken);
 }
