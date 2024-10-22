@@ -22,6 +22,7 @@ namespace KoishopServices
     {
       var claims = new List<Claim>
         {
+            new(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
             new Claim(ClaimTypes.Email, user.Email),
             new Claim(ClaimTypes.Name, user.UserName),
         };
@@ -34,7 +35,7 @@ namespace KoishopServices
 
       var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["JWTSettings:TokenKey"]));
       Console.WriteLine(_config["JWTSettings:TokenKey"]);
-      var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512);
+      var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
       var tokenOptions = new JwtSecurityToken(
         issuer: null,

@@ -1,11 +1,13 @@
 ﻿using AutoMapper;
 using DTOs.KoiFish;
 using DTOs.Order;
+using DTOs.OrderItem;
 using KoishopBusinessObjects;
 using KoishopBusinessObjects.Constants;
 using KoishopBusinessObjects.VnPayModel;
 using KoishopRepositories.Interfaces;
 using KoishopServices.Common.Exceptions;
+using KoishopServices.Common.Interface;
 using KoishopServices.Dtos.Order;
 using KoishopServices.Interfaces;
 using KoishopServices.Interfaces.Third_Party;
@@ -28,6 +30,7 @@ public class OrderService : IOrderService
     private readonly IOrderRepository _orderRepository;
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IVnPayService _vnPayService;
+    private readonly ICurrentUserService _currentUserService;
 
 
     public OrderService(IMapper mapper
@@ -36,7 +39,8 @@ public class OrderService : IOrderService
         , IOrderItemRepository orderItemRepository
         , IKoiFishRepository koiFishRepository
         , IVnPayService vnPayService
-        , IHttpContextAccessor httpContextAccessor)
+        , IHttpContextAccessor httpContextAccessor
+        , ICurrentUserService currentUserService)
     {
         this._mapper = mapper;
         this._userManager = userManager;
@@ -45,16 +49,19 @@ public class OrderService : IOrderService
         this._koiFishRepository = koiFishRepository;
         this._vnPayService = vnPayService;
         this._httpContextAccessor = httpContextAccessor;
+        this._currentUserService = currentUserService;
     }
-    public async Task<string> AddOrder(OrderCreationDto orderCreationDto, CancellationToken cancellationToken)
+    public async Task<OrderDto> AddOrder(OrderCreationDto orderCreationDto, CancellationToken cancellationToken)
     {
         //TODO: Add validation before create and mapping
-        var customer = await _userManager.FindByIdAsync(orderCreationDto.UserId.ToString());
+        var customer = await _userManager.FindByIdAsync(_currentUserService.UserId);
         if (customer == null)
         {
             throw new NotFoundException(ExceptionConstants.USER_NOT_EXIST);
         }
         var order = _mapper.Map<Order>(orderCreationDto);
+        order.UserId = customer.Id;
+        order.OrderDate = DateTime.UtcNow;
         order.Status = OrderStatus.PENDING;
         await _orderRepository.AddAsync(order);
         List<OrderItem> orderItems = new List<OrderItem>();
@@ -83,14 +90,18 @@ public class OrderService : IOrderService
         // Total ammount -> tính tiền
         order.TotalAmount = 10000; // chưa có func của Ngọc
         await _orderRepository.UpdateAsync(order);
-        PaymentInformationModel paymentInformationModel = new PaymentInformationModel
-        {
-            Amount = (double)order.TotalAmount,
-            OrderId = order.Id.ToString(),
-        };
-        var httpContext = _httpContextAccessor.HttpContext;
-        var paymentUrl = _vnPayService.CreatePaymentUrl(paymentInformationModel, httpContext);
-        return paymentUrl;
+        await _userManager.UpdateAsync(customer);
+
+        //PaymentInformationModel paymentInformationModel = new PaymentInformationModel
+        //{
+        //    Amount = (double)order.TotalAmount,
+        //    OrderId = order.Id.ToString(),
+        //};
+        //var httpContext = _httpContextAccessor.HttpContext;
+        //var paymentUrl = _vnPayService.CreatePaymentUrl(paymentInformationModel, httpContext);
+        order.User = customer;
+
+        return order.MapToOrderDto(_mapper);
     }
 
     public async Task<OrderDto> GetOrderById(int id)

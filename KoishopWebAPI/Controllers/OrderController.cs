@@ -31,13 +31,13 @@ public class OrderController : BaseApiController
     /// </summary>
     /// <param name="orderCreationDto">The data transfer object that contains the order creation details.</param>
     /// <param name="cancellationToken"></param>
-    /// <returns>VnPay payment URL or error.</returns>
+    /// <returns>An object representing the order or error.</returns>
     [HttpPost]
-    public async Task<ActionResult<JsonResponse<string>>> CreateOrder([FromBody] OrderCreationDto orderCreationDto
+    public async Task<ActionResult<OrderDto>> CreateOrder([FromBody] OrderCreationDto orderCreationDto
         , CancellationToken cancellationToken = default)
     {
         var result = await _orderService.AddOrder(orderCreationDto, cancellationToken);
-        return Ok(new JsonResponse<string>(result));
+        return Ok(result);
     }
 
     /// <summary>

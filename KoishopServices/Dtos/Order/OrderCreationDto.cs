@@ -15,18 +15,18 @@ namespace DTOs.Order;
 /// </summary>
 public class OrderCreationDto
 {
-    /// <summary>
-    /// The date and time when the order was created. Defaults to the current date and time.
-    /// </summary>
-    [SwaggerSchema(Description = "The date and time when the order was created. Defaults to the current date and time.")]
-    public DateTime OrderDate { get; set; } = DateTime.Now;
+    ///// <summary>
+    ///// The date and time when the order was created. Defaults to the current date and time.
+    ///// </summary>
+    //[SwaggerSchema(Description = "The date and time when the order was created. Defaults to the current date and time.")]
+    //public DateTime OrderDate { get; set; } = DateTime.Now;
 
-    /// <summary>
-    /// The ID of the user placing the order.
-    /// </summary>
-    [Required]
-    [SwaggerSchema(Description = "The ID of the user placing the order.")]
-    public int UserId { get; set; }
+    ///// <summary>
+    ///// The ID of the user placing the order.
+    ///// </summary>
+    //[Required]
+    //[SwaggerSchema(Description = "The ID of the user placing the order.")]
+    //public int UserId { get; set; }
 
     /// <summary>
     /// A list of items that are part of this order.
