@@ -39,6 +39,18 @@ public class KoiFishRepository : GenericRepository<KoiFish>, IKoiFishRepository
             .AsNoTracking().FirstOrDefaultAsync(q => q.Id.Equals(id));      
     }
 
+    public async Task<List<KoiFish>> GetKoiFishByIds(List<int> ids)
+    {
+        return await _context.KoiFishes
+            .Where(e => e.isDeleted == false && ids.Contains(e.Id))
+            .Include(fish => fish.Breed)
+            .Include(fish => fish.OrderItems)
+            .Include(fish => fish.ConsignmentItems)
+            .Include(fish => fish.FishCare)
+            .Include(fish => fish.Ratings)
+            .AsNoTracking().ToListAsync();      
+    }
+
     public decimal GetMaxPrices()
     {
         return _context.KoiFishes
