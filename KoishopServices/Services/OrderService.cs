@@ -2,22 +2,29 @@
 using DTOs.KoiFish;
 using DTOs.Order;
 using DTOs.OrderItem;
+using DTOs.Rating;
 using KoishopBusinessObjects;
 using KoishopBusinessObjects.Constants;
 using KoishopBusinessObjects.VnPayModel;
 using KoishopRepositories.Interfaces;
 using KoishopServices.Common.Exceptions;
 using KoishopServices.Common.Interface;
+using KoishopServices.Common.Pagination;
 using KoishopServices.Dtos.Order;
+using KoishopServices.Dtos.Rating;
 using KoishopServices.Interfaces;
 using KoishopServices.Interfaces.Third_Party;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace KoishopServices.Services;
 
@@ -59,6 +66,12 @@ public class OrderService : IOrderService
         {
             throw new NotFoundException(ExceptionConstants.USER_NOT_EXIST);
         }
+        var koiFishIds = orderCreationDto.OrderItemCreationDtos.Select(x => x.KoiFishId).Where(id => id.HasValue).Distinct();
+        if (koiFishIds.Count() > 1)
+        {
+            throw new DuplicationException(ExceptionConstants.ORDER_ITEM_DUPLICATE_INPUT_KOIFISH_ID);
+        }
+
         var order = _mapper.Map<Order>(orderCreationDto);
         order.UserId = customer.Id;
         order.OrderDate = DateTime.UtcNow;
@@ -80,13 +93,10 @@ public class OrderService : IOrderService
             orderItem.Price = koiFish.Price; // check lại
             orderItem.OrderId = order.Id;
             orderItems.Add(orderItem);
+            await _orderItemRepository.AddAsync(orderItem);
         }
         order.OrderItems = orderItems;
         order.Quantity = orderItems.Count;
-        foreach (var orderItem in orderItems)
-        {
-            await _orderItemRepository.AddAsync(orderItem);
-        }
         // Total ammount -> tính tiền
         order.TotalAmount = 10000; // chưa có func của Ngọc
         await _orderRepository.UpdateAsync(order);
@@ -104,12 +114,15 @@ public class OrderService : IOrderService
         return order.MapToOrderDto(_mapper);
     }
 
-    public async Task<OrderDto> GetOrderById(int id)
+    public async Task<OrderDto> GetOrderById(int id, CancellationToken cancellationToken)
     {
-        var order = await _orderRepository.GetByIdAsync(id);
+        var order = await _orderRepository.FindAsync(order => order.Id == id && order.isDeleted == false,
+                q => q.Include(item => item.OrderItems.Where(i => i.isDeleted == false))
+                        .ThenInclude(item => item.KoiFish)
+                        .Include(customer => customer.User), cancellationToken);
         if (order == null)
             return null;
-        return _mapper.Map<OrderDto>(order);
+        return order.MapToOrderDto(_mapper);
     }
 
     public async Task<IEnumerable<OrderDto>> GetListOrder()
@@ -128,14 +141,47 @@ public class OrderService : IOrderService
         return true;
     }
 
-    public async Task<bool> UpdateOrder(int id, OrderUpdateDto orderUpdateDto)
+    public async Task<bool> UpdateOrderItem(int id, OrderUpdateItemDto orderUpdateDto, CancellationToken cancellationToken)
     {
-        var existingOrder = await _orderRepository.GetByIdAsync(id);
+        var existingOrder = await _orderRepository.FindAsync(order => order.Id == id && order.isDeleted == false,
+                q => q.Include(item => item.OrderItems.Where(i => i.isDeleted == false))
+                        .Include(customer => customer.User), cancellationToken);
         if (existingOrder == null)
-            return false;
-
-        //TODO: Add validation before Update and mapping
-        _mapper.Map(orderUpdateDto, existingOrder);
+        {
+            throw new NotFoundException(ExceptionConstants.ORDER_NOT_EXIST + id);
+        }
+        var existingOrderItems = existingOrder.OrderItems.ToDictionary(item => item.KoiFishId);
+        var updatedOrderItems = orderUpdateDto.OrderItemCreationDtos.ToDictionary(updateItem => updateItem.KoiFishId);
+        //Check để xóa orderItem không còn tồn tại trong đon thanh toán
+        foreach (var orderItem in existingOrderItems)
+        {
+            if (!updatedOrderItems.ContainsKey(orderItem.Key))
+            {
+                orderItem.Value.isDeleted = true;
+                await _orderItemRepository.UpdateAsync(orderItem.Value);
+            }
+        }
+        // Add item mới vào order
+        foreach (var updateItem in updatedOrderItems)
+        {
+            if (!existingOrderItems.ContainsKey(updateItem.Key))
+            {
+                var koiFish = await _koiFishRepository.FindAsync(x => x.Id == updateItem.Value.KoiFishId && x.isDeleted == false, cancellationToken);
+                if (koiFish == null)
+                {
+                    throw new NotFoundException(ExceptionConstants.KOIFISH_NOT_EXIST + updateItem.Value.KoiFishId);
+                }
+                if (koiFish.Status != KoiFishStatus.AVAILABLE)
+                {
+                    throw new ValidationException(ExceptionConstants.INVALID_KOIFISH_STATUS);
+                }
+                var newOrderItem = _mapper.Map<OrderItem>(updateItem.Value);
+                newOrderItem.Price = koiFish.Price; // check lại
+                existingOrder.OrderItems.Add(newOrderItem);
+                await _orderItemRepository.AddAsync(newOrderItem);
+            }
+        }
+        //TODO: tính lại total price của order - Đợi Ngọc
         await _orderRepository.UpdateAsync(existingOrder);
         return true;
     }
@@ -193,5 +239,50 @@ public class OrderService : IOrderService
         order.Status = orderStatusUpdateDto.Status;
         await _orderRepository.UpdateAsync(order);
         return true;
+    }
+
+    public async Task<PagedResult<OrderDto>> GetOrderByUserId(FilterOrderDto filterOrderDto, CancellationToken cancellationToken)
+    {    
+        Func<IQueryable<Order>, IQueryable<Order>> queryOptions = query =>
+        {
+            query = query.Include(item => item.OrderItems.Where(i => i.isDeleted == false))
+                        .ThenInclude(item => item.KoiFish)
+                        .Include(customer => customer.User);
+            query = query.Where(x => x.isDeleted == false);
+            if (filterOrderDto.UserId != -1)
+            {
+                query = query.Where(x => x.UserId == filterOrderDto.UserId);
+            }
+            if (filterOrderDto.Quantity != -1)
+            {
+                query = query.Where(x => x.Quantity == filterOrderDto.Quantity);
+            }
+            if (!string.IsNullOrEmpty(filterOrderDto.Status))
+            {
+                query = query.Where(x => x.Status.Contains(filterOrderDto.Status));
+            }
+            if (!string.IsNullOrEmpty(filterOrderDto.OrderDate))
+            {
+                DateTime date = DateTime.ParseExact(filterOrderDto.OrderDate, "dd/MM/yyyy", null, System.Globalization.DateTimeStyles.None);
+                query = query.Where(x => x.DateCreated.Date == date);
+            }
+            if (!string.IsNullOrEmpty(filterOrderDto.SortBy))
+            {
+                query = filterOrderDto.IsDescending
+                    ? query.OrderByDescending(e => EF.Property<object>(e, filterOrderDto.SortBy))
+                    : query.OrderBy(e => EF.Property<object>(e, filterOrderDto.SortBy));
+            }         
+            return query;
+        };
+
+        var result = await _orderRepository.FindAllAsync(filterOrderDto.PageNumber, filterOrderDto.PageSize, queryOptions, cancellationToken);
+        if (result == null)
+            return null;
+        return PagedResult<OrderDto>.Create(
+               totalCount: result.TotalCount,
+               pageCount: result.PageCount,
+               pageSize: result.PageSize,
+               pageNumber: result.PageNo,
+               data: result.MapToOrderDtoList(_mapper));
     }
 }

@@ -71,6 +71,12 @@ public class KoiFishService : IKoiFishService
         return _mapper.Map<IPagedList<KoiFishDto>>(koiFishEnity);
     }
 
+    public async Task<List<KoiFishDto>> GetKoiFishByIds(List<int> ids)
+    {
+        var listFish = await _koifishRepository.GetKoiFishByIds(ids);
+        return _mapper.Map<List<KoiFishDto>>(listFish);
+    }
+
     public async Task<FilterKoiFishParamDto> GetFilterParam()
     {
         return new FilterKoiFishParamDto {

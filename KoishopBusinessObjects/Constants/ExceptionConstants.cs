@@ -26,10 +26,14 @@ namespace KoishopBusinessObjects.Constants
         public const string INVALID_RATING_VALUE = "Invalid rating value! Value must be greater than 0 and less than 5";
         #endregion
 
-        #region
+        #region Order exception
         public const string INVALID_ORDER_STATUS = "Invalid order status";
         public const string INVALID_ORDER_TOTAL_AMOUNT = "Invalid total amount";
         public const string ORDER_NOT_EXIST = "Order is not existed: ";
+        #endregion
+
+        #region Order item exception
+        public const string ORDER_ITEM_DUPLICATE_INPUT_KOIFISH_ID = "Duplicated Koifish Id";
         #endregion
     }
 }
