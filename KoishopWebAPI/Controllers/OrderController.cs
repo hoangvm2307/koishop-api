@@ -46,24 +46,24 @@ public class OrderController : BaseApiController
     /// <param name="id">The ID of the order to retrieve.</param>
     /// <returns>The <see cref="OrderDto"/> object representing the order, or a 404 Not Found response if not found.</returns>
     [HttpGet("{id}")]
-    public async Task<ActionResult<OrderDto>> GetOrderById(int id)
+    public async Task<ActionResult<OrderDto>> GetOrderById(int id, CancellationToken cancellationToken = default)
     {
-        var order = await _orderService.GetOrderById(id);
+        var order = await _orderService.GetOrderById(id, cancellationToken);
         if (order == null)
             return NotFound();
         return Ok(order);
     }
 
     /// <summary>
-    /// Updates an existing order by its ID.
+    /// Updates order items of existing order by its ID.
     /// </summary>
     /// <param name="id">The ID of the order to update.</param>
     /// <param name="orderUpdateDto">The data transfer object containing the updated order details.</param>
     /// <returns>An empty No Content response if the update is successful, or 404 Not Found if the order does not exist.</returns>
-    [HttpPut("{id}")]
-    public async Task<ActionResult> UpdateOrder(int id, OrderUpdateDto orderUpdateDto)
+    [HttpPut("order/{id}/orderItems")]
+    public async Task<ActionResult> UpdateOrderItem(int id, OrderUpdateItemDto orderUpdateDto, CancellationToken cancellationToken = default)
     {
-        var isUpdated = await _orderService.UpdateOrder(id, orderUpdateDto);
+        var isUpdated = await _orderService.UpdateOrderItem(id, orderUpdateDto, cancellationToken);
         if (!isUpdated)
             return NotFound();
         return NoContent();

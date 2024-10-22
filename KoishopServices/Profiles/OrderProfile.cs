@@ -16,6 +16,6 @@ public class OrderProfile : Profile
     {
         CreateMap<OrderDto, Order>().ReverseMap();
         CreateMap<OrderCreationDto, Order>();
-        CreateMap<OrderUpdateDto, Order>();
+        CreateMap<OrderUpdateItemDto, Order>();
     }
 }
