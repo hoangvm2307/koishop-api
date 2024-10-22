@@ -14,7 +14,6 @@ public class OrderItemDto
     public int Id { get; set; }
     public decimal Price { get; set; }
     public int? OrderId { get; set; }
-    public virtual OrderDto? Order { get; set; }
     public int? KoiFishId { get; set; }
-    public virtual KoiFishDto? KoiFish { get; set; }
+    public string KoiFishName { get; set; }
 }
