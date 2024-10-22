@@ -8,6 +8,8 @@ public interface IKoiFishRepository : IGenericRepository<KoiFish>
     Task<IQueryable<KoiFish>> GetKoiFishs(KoiFishParams koiFishParams);
     Task<KoiFish> GetKoiFishDetail(int id);
     Task<List<KoiFish>> GetKoiFishByIds(List<int> ids);
+    Task<List<KoiFish>> GetRelatedKoiFishBy(KoiFish koiFish);
+    Task<List<KoiFish>> GetRandomKoiFishExcludingCurrent(int currentKoiFishId);
     decimal GetMaxPrices();
     decimal GetMinPrices();
     int GetMaxAge();

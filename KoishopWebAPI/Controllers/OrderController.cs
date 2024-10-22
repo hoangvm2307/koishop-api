@@ -33,7 +33,7 @@ public class OrderController : BaseApiController
     [HttpGet("filter")]
     public async Task<ActionResult<PagedResult<OrderDto>>> GetOrdersByUserId([FromQuery]FilterOrderDto filterOrderDto, CancellationToken cancellationToken = default)
     {
-        var orders = await _orderService.GetOrderByUserId(filterOrderDto, cancellationToken);
+        var orders = await _orderService.FilterOrder(filterOrderDto, cancellationToken);
         return Ok(orders);
     }
 

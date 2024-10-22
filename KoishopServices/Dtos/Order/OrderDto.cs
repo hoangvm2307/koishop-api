@@ -17,6 +17,6 @@ public class OrderDto
     public decimal TotalAmount { get; set; }
     public string? Status { get; set; }
     public int? UserId { get; set; }
-    public virtual UserDto? UserDto { get; set; }
+    public string UserName { get; set; }
     public virtual ICollection<OrderItemDto>? OrderItems { get; set; }
 }

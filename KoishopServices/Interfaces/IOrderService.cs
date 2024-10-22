@@ -20,5 +20,5 @@ public interface IOrderService
     Task<bool> RemoveOrder(int id);
     Task<bool> AfterPaymentSuccess(int id, CancellationToken cancellationToken);
     Task<bool> UpdateOrderStatus(OrderStatusUpdateDto orderStatusUpdateDto, CancellationToken cancellationToken);
-    Task<PagedResult<OrderDto>> GetOrderByUserId(FilterOrderDto filterOrderDto, CancellationToken cancellationToken);
+    Task<PagedResult<OrderDto>> FilterOrder(FilterOrderDto filterOrderDto, CancellationToken cancellationToken);
 }
