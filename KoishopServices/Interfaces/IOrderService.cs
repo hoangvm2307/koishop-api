@@ -13,9 +13,9 @@ namespace KoishopServices.Interfaces;
 public interface IOrderService
 {
     Task<IEnumerable<OrderDto>> GetListOrder();
-    Task<OrderDto> GetOrderById(int id);
+    Task<OrderDto> GetOrderById(int id, CancellationToken cancellationToken);
     Task<OrderDto> AddOrder(OrderCreationDto orderCreationDto, CancellationToken cancellationToken);
-    Task<bool> UpdateOrder(int id, OrderUpdateDto orderUpdateDto);
+    Task<bool> UpdateOrderItem(int id, OrderUpdateItemDto orderUpdateDto, CancellationToken cancellationToken);
     Task<bool> RemoveOrder(int id);
     Task<bool> AfterPaymentSuccess(int id, CancellationToken cancellationToken);
     Task<bool> UpdateOrderStatus(OrderStatusUpdateDto orderStatusUpdateDto, CancellationToken cancellationToken);
