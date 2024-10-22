@@ -101,17 +101,10 @@ public class OrderService : IOrderService
         order.TotalAmount = 10000; // chưa có func của Ngọc
         await _orderRepository.UpdateAsync(order);
         await _userManager.UpdateAsync(customer);
-
-        //PaymentInformationModel paymentInformationModel = new PaymentInformationModel
-        //{
-        //    Amount = (double)order.TotalAmount,
-        //    OrderId = order.Id.ToString(),
-        //};
-        //var httpContext = _httpContextAccessor.HttpContext;
-        //var paymentUrl = _vnPayService.CreatePaymentUrl(paymentInformationModel, httpContext);
         order.User = customer;
 
-        return order.MapToOrderDto(_mapper);
+        var koifishName = await _koiFishRepository.FindAllToDictionaryAsync(x => x.isDeleted == false, x => x.Id, x => x.Name, cancellationToken);
+        return order.MapToOrderDto(_mapper, customer.UserName, koifishName);
     }
 
     public async Task<OrderDto> GetOrderById(int id, CancellationToken cancellationToken)
@@ -120,9 +113,11 @@ public class OrderService : IOrderService
                 q => q.Include(item => item.OrderItems.Where(i => i.isDeleted == false))
                         .ThenInclude(item => item.KoiFish)
                         .Include(customer => customer.User), cancellationToken);
+        Dictionary<int, string> users = new Dictionary<int, string>();
         if (order == null)
             return null;
-        return order.MapToOrderDto(_mapper);
+        var koifishName = await _koiFishRepository.FindAllToDictionaryAsync(x => x.isDeleted == false, x => x.Id, x => x.Name, cancellationToken);
+        return order.MapToOrderDto(_mapper, order.User.UserName, koifishName);
     }
 
     public async Task<IEnumerable<OrderDto>> GetListOrder()
@@ -241,7 +236,7 @@ public class OrderService : IOrderService
         return true;
     }
 
-    public async Task<PagedResult<OrderDto>> GetOrderByUserId(FilterOrderDto filterOrderDto, CancellationToken cancellationToken)
+    public async Task<PagedResult<OrderDto>> FilterOrder(FilterOrderDto filterOrderDto, CancellationToken cancellationToken)
     {    
         Func<IQueryable<Order>, IQueryable<Order>> queryOptions = query =>
         {
@@ -276,6 +271,15 @@ public class OrderService : IOrderService
         };
 
         var result = await _orderRepository.FindAllAsync(filterOrderDto.PageNumber, filterOrderDto.PageSize, queryOptions, cancellationToken);
+        var koifishName = await _koiFishRepository.FindAllToDictionaryAsync(x => x.isDeleted == false, x => x.Id, x => x.Name, cancellationToken);
+        Dictionary<int, string> users = new Dictionary<int, string>();
+        foreach(var order in result)
+        {
+            if (!users.ContainsValue(order.User.UserName))
+            {
+                users.Add((int)order.UserId, order.User.UserName);
+            }
+        }
         if (result == null)
             return null;
         return PagedResult<OrderDto>.Create(
@@ -283,6 +287,6 @@ public class OrderService : IOrderService
                pageCount: result.PageCount,
                pageSize: result.PageSize,
                pageNumber: result.PageNo,
-               data: result.MapToOrderDtoList(_mapper));
+               data: result.MapToOrderDtoList(_mapper, users, koifishName));
     }
 }
