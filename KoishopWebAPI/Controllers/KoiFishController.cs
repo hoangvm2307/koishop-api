@@ -62,6 +62,26 @@ public class KoiFishController : BaseApiController
         return Ok(koiFish);
     }
 
+    /// <summary>
+    /// Get KoiFish by list ids
+    /// </summary>
+    /// <param name="ids"></param>
+    /// <returns></returns>
+    [HttpGet("list-ids")]
+    public async Task<ActionResult<List<KoiFishDto>>> GetKoiFishByIds([FromQuery]int[] ids)
+    {
+        var koiFish = await _koiFishService.GetKoiFishByIds(ids.ToList());
+        if (koiFish == null)
+            return NotFound();
+        return Ok(koiFish);
+    }
+
+    /// <summary>
+    /// Update a KoiFish by id
+    /// </summary>
+    /// <param name="id"></param>
+    /// <param name="koiFishUpdateDto"></param>
+    /// <returns></returns>
     [HttpPut("{id}")]
     public async Task<ActionResult> UpdateKoiFish(int id, KoiFishUpdateDto koiFishUpdateDto)
     {
@@ -71,6 +91,11 @@ public class KoiFishController : BaseApiController
         return NoContent();
     }
 
+    /// <summary>
+    /// Delete a KoiFish by id
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
     [HttpDelete("{id}")]
     public async Task<ActionResult> DeleteKoiFish(int id)
     {
