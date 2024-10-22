@@ -2,18 +2,22 @@
 using DTOs.KoiFish;
 using DTOs.Order;
 using DTOs.OrderItem;
+using DTOs.Rating;
 using KoishopBusinessObjects;
 using KoishopBusinessObjects.Constants;
 using KoishopBusinessObjects.VnPayModel;
 using KoishopRepositories.Interfaces;
 using KoishopServices.Common.Exceptions;
 using KoishopServices.Common.Interface;
+using KoishopServices.Common.Pagination;
 using KoishopServices.Dtos.Order;
+using KoishopServices.Dtos.Rating;
 using KoishopServices.Interfaces;
 using KoishopServices.Interfaces.Third_Party;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -235,5 +239,50 @@ public class OrderService : IOrderService
         order.Status = orderStatusUpdateDto.Status;
         await _orderRepository.UpdateAsync(order);
         return true;
+    }
+
+    public async Task<PagedResult<OrderDto>> GetOrderByUserId(FilterOrderDto filterOrderDto, CancellationToken cancellationToken)
+    {    
+        Func<IQueryable<Order>, IQueryable<Order>> queryOptions = query =>
+        {
+            query = query.Include(item => item.OrderItems.Where(i => i.isDeleted == false))
+                        .ThenInclude(item => item.KoiFish)
+                        .Include(customer => customer.User);
+            query = query.Where(x => x.isDeleted == false);
+            if (filterOrderDto.UserId != -1)
+            {
+                query = query.Where(x => x.UserId == filterOrderDto.UserId);
+            }
+            if (filterOrderDto.Quantity != -1)
+            {
+                query = query.Where(x => x.Quantity == filterOrderDto.Quantity);
+            }
+            if (!string.IsNullOrEmpty(filterOrderDto.Status))
+            {
+                query = query.Where(x => x.Status.Contains(filterOrderDto.Status));
+            }
+            if (!string.IsNullOrEmpty(filterOrderDto.OrderDate))
+            {
+                DateTime date = DateTime.ParseExact(filterOrderDto.OrderDate, "dd/MM/yyyy", null, System.Globalization.DateTimeStyles.None);
+                query = query.Where(x => x.DateCreated.Date == date);
+            }
+            if (!string.IsNullOrEmpty(filterOrderDto.SortBy))
+            {
+                query = filterOrderDto.IsDescending
+                    ? query.OrderByDescending(e => EF.Property<object>(e, filterOrderDto.SortBy))
+                    : query.OrderBy(e => EF.Property<object>(e, filterOrderDto.SortBy));
+            }         
+            return query;
+        };
+
+        var result = await _orderRepository.FindAllAsync(filterOrderDto.PageNumber, filterOrderDto.PageSize, queryOptions, cancellationToken);
+        if (result == null)
+            return null;
+        return PagedResult<OrderDto>.Create(
+               totalCount: result.TotalCount,
+               pageCount: result.PageCount,
+               pageSize: result.PageSize,
+               pageNumber: result.PageNo,
+               data: result.MapToOrderDtoList(_mapper));
     }
 }

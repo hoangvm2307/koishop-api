@@ -1,4 +1,5 @@
 ﻿using DTOs.Order;
+using KoishopServices.Common.Pagination;
 using KoishopServices.Dtos.Order;
 using KoishopServices.Interfaces;
 using Microsoft.AspNetCore.Http;
@@ -23,6 +24,16 @@ public class OrderController : BaseApiController
     public async Task<ActionResult<List<OrderDto>>> GetOrders()
     {
         var orders = await _orderService.GetListOrder();
+        return Ok(orders);
+    }
+
+    /// <summary>
+    /// Retrieves a list of all orders with filter options.
+    /// </summary>
+    [HttpGet("filter")]
+    public async Task<ActionResult<PagedResult<OrderDto>>> GetOrdersByUserId([FromQuery]FilterOrderDto filterOrderDto, CancellationToken cancellationToken = default)
+    {
+        var orders = await _orderService.GetOrderByUserId(filterOrderDto, cancellationToken);
         return Ok(orders);
     }
 
