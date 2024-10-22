@@ -13,12 +13,11 @@ public class KoiFishParams : PaginationParams
     public decimal? MaxPrice { get; set; }
     public int? MinAge { get; set; }
     public int? MaxAge { get; set; }
-    // public decimal? MinSize { get; set; }
-    // public decimal? MaxSize { get; set; }
+    public decimal? MinSize { get; set; }
+    public decimal? MaxSize { get; set; }
     public string? Origin { get; set; }
-    public List<string>? Sizes { get; set; }
     public List<string>? Genders { get; set; }
     public List<string>? Types { get; set; }
     public List<string>? Status { get; set; }
-    public int? BreedId { get; set; }
+    public List<string>? BreedName { get; set; }
 }
