@@ -14,7 +14,7 @@ public interface IOrderService
 {
     Task<IEnumerable<OrderDto>> GetListOrder();
     Task<OrderDto> GetOrderById(int id);
-    Task<string> AddOrder(OrderCreationDto orderCreationDto, CancellationToken cancellationToken);
+    Task<OrderDto> AddOrder(OrderCreationDto orderCreationDto, CancellationToken cancellationToken);
     Task<bool> UpdateOrder(int id, OrderUpdateDto orderUpdateDto);
     Task<bool> RemoveOrder(int id);
     Task<bool> AfterPaymentSuccess(int id, CancellationToken cancellationToken);
