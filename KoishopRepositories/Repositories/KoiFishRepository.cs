@@ -51,6 +51,31 @@ public class KoiFishRepository : GenericRepository<KoiFish>, IKoiFishRepository
             .AsNoTracking().ToListAsync();      
     }
 
+    public async Task<List<KoiFish>> GetRelatedKoiFishBy(KoiFish koiFish)
+    {
+        return await _context.KoiFishes
+            .Where(e => e.isDeleted == false && 
+                    e.Id != koiFish.Id &&
+                    (e.BreedId == koiFish.BreedId
+                    ||e.Type.Trim().ToLower() == koiFish.Type.Trim().ToLower()
+                    ||e.Origin.Trim().ToLower() == koiFish.Origin.Trim().ToLower()))
+            .Include(fish => fish.Breed)
+            .Include(fish => fish.Ratings)
+            .AsNoTracking().ToListAsync();      
+    }
+    
+    public async Task<List<KoiFish>> GetRandomKoiFishExcludingCurrent(int currentKoiFishId)
+    {
+        var random = new Random();
+        var allKoiFish = await _context.KoiFishes
+            .Where(kf => kf.Id != currentKoiFishId)
+            .ToListAsync();
+
+        var randomKoiFish = allKoiFish.OrderBy(kf => random.Next()).ToList();
+
+        return randomKoiFish;
+    }
+
     public decimal GetMaxPrices()
     {
         return _context.KoiFishes

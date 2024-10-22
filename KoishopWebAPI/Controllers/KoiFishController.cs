@@ -76,6 +76,16 @@ public class KoiFishController : BaseApiController
         return Ok(koiFish);
     }
 
+    
+    [HttpGet("related/{id}")]
+    public async Task<ActionResult<List<KoiFishDto>>> GetRelatedKoiFishBy(int id)
+    {
+        var listFish = await _koiFishService.GetRelatedKoiFishBy(id);
+        if (listFish == null)
+            return NotFound();
+        return Ok(listFish);
+    }
+
     /// <summary>
     /// Update a KoiFish by id
     /// </summary>

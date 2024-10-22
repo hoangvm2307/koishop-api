@@ -7,6 +7,7 @@ public interface IKoiFishService
 {
     Task<IPagedList<KoiFishDto>> GetListKoiFish(KoiFishParams koiFishParams);
     Task<KoiFishDto> GetKoiFishById(int id);
+    Task<List<KoiFishDto>> GetRelatedKoiFishBy(int id);
     Task<FilterKoiFishParamDto> GetFilterParam();
     Task<List<KoiFishDto>> GetKoiFishByIds(List<int> ids);
     Task AddKoiFish(KoiFishCreationDto koiFishCreationDto);

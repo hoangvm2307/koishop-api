@@ -7,6 +7,7 @@ using KoishopRepositories.Repositories.RequestHelpers;
 using KoishopServices.Common.Exceptions;
 using KoishopServices.Interfaces;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.IdentityModel.Tokens;
 
 namespace KoishopServices.Services;
 
@@ -74,6 +75,17 @@ public class KoiFishService : IKoiFishService
     public async Task<List<KoiFishDto>> GetKoiFishByIds(List<int> ids)
     {
         var listFish = await _koifishRepository.GetKoiFishByIds(ids);
+        return _mapper.Map<List<KoiFishDto>>(listFish);
+    }
+
+    public async Task<List<KoiFishDto>> GetRelatedKoiFishBy(int id)
+    {
+        var koiFish = await _koifishRepository.GetKoiFishDetail(id);
+        if (koiFish == null)
+            return null;
+
+        var listFish = await _koifishRepository.GetRelatedKoiFishBy(koiFish);
+        if (listFish.IsNullOrEmpty()) listFish = await _koifishRepository.GetRandomKoiFishExcludingCurrent(id);
         return _mapper.Map<List<KoiFishDto>>(listFish);
     }
 
