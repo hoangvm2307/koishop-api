@@ -13,7 +13,7 @@ public class Order : BaseEntity
     public DateTime OrderDate { get; set; } = DateTime.Now;
     public decimal TotalAmount { get; set; }
     public string? Status { get; set; }
-
+    public bool IsConsignment {  get; set; }
 
     [ForeignKey(nameof(User))]
     public int? UserId { get; set; }

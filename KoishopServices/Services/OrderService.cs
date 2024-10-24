@@ -38,6 +38,8 @@ public class OrderService : IOrderService
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IVnPayService _vnPayService;
     private readonly ICurrentUserService _currentUserService;
+    private readonly IConsignmentItemRepository _consignmentItemRepository;
+    private readonly IConsignmentRepository _consignmentRepository;
 
 
     public OrderService(IMapper mapper
@@ -47,7 +49,9 @@ public class OrderService : IOrderService
         , IKoiFishRepository koiFishRepository
         , IVnPayService vnPayService
         , IHttpContextAccessor httpContextAccessor
-        , ICurrentUserService currentUserService)
+        , ICurrentUserService currentUserService
+        , IConsignmentItemRepository consignmentItemRepository
+        , IConsignmentRepository consignmentRepository)
     {
         this._mapper = mapper;
         this._userManager = userManager;
@@ -57,6 +61,8 @@ public class OrderService : IOrderService
         this._vnPayService = vnPayService;
         this._httpContextAccessor = httpContextAccessor;
         this._currentUserService = currentUserService;
+        _consignmentItemRepository = consignmentItemRepository;
+        _consignmentRepository = consignmentRepository;
     }
     public async Task<OrderDto> AddOrder(OrderCreationDto orderCreationDto, CancellationToken cancellationToken)
     {
@@ -183,6 +189,11 @@ public class OrderService : IOrderService
 
     public async Task<bool> AfterPaymentSuccess(int id, CancellationToken cancellationToken)
     {
+        var customer = await _userManager.FindByIdAsync(_currentUserService.UserId);
+        if (customer == null)
+        {
+            throw new NotFoundException(ExceptionConstants.USER_NOT_EXIST + _currentUserService.UserId);
+        }
         var order = await _orderRepository.FindAsync(x => x.Id ==  id && x.isDeleted == false, cancellationToken);
         if (order == null)
         {
@@ -208,13 +219,52 @@ public class OrderService : IOrderService
             }           
             koifishes.Add(koifish);
         }
-        foreach (var koi in koifishes)
+        //Handle ký gửi
+        switch (order.IsConsignment)
         {
-            koi.Status = KoiFishStatus.SOLD;
-            koi.DateModified = DateTime.Now;
-            await _koiFishRepository.UpdateAsync(koi);
-        }
-        order.Status = OrderStatus.PROCESSING;
+            case false:
+                order.Status = OrderStatus.PROCESSING;
+                foreach (var koi in koifishes)
+                {
+                    koi.Status = KoiFishStatus.SOLD;
+                    koi.DateModified = DateTime.Now;
+                    koi.UserId = customer.Id;
+                    await _koiFishRepository.UpdateAsync(koi);
+                }
+                break;
+            case true:
+                Consignment consignment = new Consignment();
+                order.Status = OrderStatus.HOLDING;
+                consignment.ConsignmentType = ConsignmentType.OFFLINE;
+                consignment.Status = ConsignmentStatus.APPROVED;
+                consignment.DateCreated = DateTime.Now;
+                consignment.StartDate = DateTime.UtcNow;
+                consignment.CreatedBy = customer.UserName;
+                consignment.EndDate = consignment.StartDate.AddDays(30); // 30 ngày free, sau đó tính tiền thêm 
+                consignment.Price = 0;
+                consignment.UserID = customer.Id;
+                await _consignmentRepository.AddAsync(consignment);
+                List<ConsignmentItem> consignmentItems = new List<ConsignmentItem>();
+                foreach (var koi in koifishes)
+                {
+                    koi.Status = KoiFishStatus.RESERVED;
+                    koi.DateModified = DateTime.Now;
+                    koi.UserId = customer.Id;
+                    ConsignmentItem consignmentItem = new ConsignmentItem
+                    {
+                        ConsignmentId = consignment.Id,
+                        DateCreated = DateTime.Now,
+                        CreatedBy = customer.UserName,
+                        KoiFishId = koi.Id,
+                        Price = 0,                       
+                    };
+                    await _consignmentItemRepository.AddAsync(consignmentItem);
+                    await _koiFishRepository.UpdateAsync(koi);
+                }
+                consignment.ConsignmentItems = consignmentItems;
+                await _consignmentRepository.UpdateAsync(consignment);
+                break;
+        }     
         order.DateModified = DateTime.Now;
         await _orderRepository.UpdateAsync(order);
         return true;
