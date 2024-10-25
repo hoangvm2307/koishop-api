@@ -34,4 +34,11 @@ public class OrderCreationDto
     [Required]
     [SwaggerSchema(Description = "A list of items that are part of this order.")]
     public List<OrderItemCreationDto> OrderItemCreationDtos { get; set; }
+
+    /// <summary>
+    /// Specifies whether the order need to consignment or not.
+    /// </summary>
+    [Required]
+    [SwaggerSchema(Description = "Specifies whether the order need to consignment or not.")]
+    public bool IsConsignment { get; set; }
 }

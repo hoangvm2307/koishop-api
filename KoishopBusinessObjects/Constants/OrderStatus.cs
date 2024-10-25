@@ -13,4 +13,5 @@ public static class OrderStatus
     public const string DELIVERING = "Delivering";
     public const string DELIVERED = "Delivered";
     public const string CANCELLED = "Cancelled";
+    public const string HOLDING = "Holding";
 }
