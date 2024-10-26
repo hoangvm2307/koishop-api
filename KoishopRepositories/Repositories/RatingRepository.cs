@@ -1,11 +1,7 @@
 ﻿using KoishopBusinessObjects;
 using KoishopRepositories.DatabaseContext;
 using KoishopRepositories.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 
 namespace KoishopRepositories.Repositories
 {
@@ -18,5 +14,12 @@ namespace KoishopRepositories.Repositories
             _context = context;
         }
 
+        public async Task<List<Rating>> GetListAsync() 
+        {
+            return await _context.Ratings
+                .Where(e => e.isDeleted == false || e.isDeleted == null)
+                .Include(e => e.User)
+                .AsNoTracking().ToListAsync(); 
+        }
     }
 }

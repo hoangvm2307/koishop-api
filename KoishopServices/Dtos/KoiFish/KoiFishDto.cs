@@ -2,8 +2,8 @@
 using DTOs.Consignment;
 using DTOs.FishCare;
 using DTOs.OrderItem;
-using DTOs.Rating;
 using KoishopBusinessObjects;
+using KoishopServices.Dtos.Rating;
 
 namespace DTOs.KoiFish;
 
