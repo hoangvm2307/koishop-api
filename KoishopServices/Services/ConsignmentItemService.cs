@@ -1,14 +1,8 @@
 ﻿using AutoMapper;
 using DTOs.ConsignmentItem;
-using DTOs.ConsignmentItem;
 using KoishopBusinessObjects;
 using KoishopRepositories.Interfaces;
 using KoishopServices.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace KoishopServices.Services;
 
@@ -31,15 +25,23 @@ public class ConsignmentItemService : IConsignmentItemService
 
     public async Task<ConsignmentItemDto> GetConsignmentItemById(int id)
     {
-        var consignmentItem = await _consignmentItemRepository.GetByIdAsync(id);
+        var consignmentItem = await _consignmentItemRepository.GetConsignmentByIdAsync(id);
         if (consignmentItem == null)
             return null;
         return _mapper.Map<ConsignmentItemDto>(consignmentItem);
     }
 
+    public async Task<IEnumerable<ConsignmentItemDto>> GetConsignmentItemByConsignmentId(int consignmentId)
+    {
+        var consignmentItem = await _consignmentItemRepository.GetAllConsignmentItemByConsignmentIdAsync(consignmentId);
+        if (consignmentItem == null)
+            return null;
+        return _mapper.Map<List<ConsignmentItemDto>>(consignmentItem);
+    }
+
     public async Task<IEnumerable<ConsignmentItemDto>> GetListConsignmentItem()
     {
-        var consignmentItems = await _consignmentItemRepository.GetAllAsync();
+        var consignmentItems = await _consignmentItemRepository.GetAllConsignmentItemAsync();
         var result = _mapper.Map<List<ConsignmentItemDto>>(consignmentItems);
         return result;
     }
