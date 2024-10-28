@@ -1,7 +1,5 @@
 ﻿using DTOs.Breed;
 using KoishopServices.Interfaces;
-using Microsoft.AspNetCore.Cors.Infrastructure;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace KoishopWebAPI.Controllers;

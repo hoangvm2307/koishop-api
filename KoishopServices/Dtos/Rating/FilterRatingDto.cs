@@ -1,10 +1,4 @@
-﻿using DTOs.AccountDtos;
-using Swashbuckle.AspNetCore.Annotations;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Swashbuckle.AspNetCore.Annotations;
 
 namespace KoishopServices.Dtos.Rating
 {

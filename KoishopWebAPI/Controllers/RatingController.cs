@@ -1,5 +1,4 @@
-﻿using DTOs.Breed;
-using DTOs.Rating;
+﻿using DTOs.Rating;
 using KoishopServices.Common.Pagination;
 using KoishopServices.Dtos.Rating;
 using KoishopServices.Interfaces;

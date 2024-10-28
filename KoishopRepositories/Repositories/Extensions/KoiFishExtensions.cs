@@ -1,5 +1,4 @@
 ﻿using KoishopBusinessObjects;
-using KoishopRepositories.Migrations;
 using KoishopRepositories.Repositories.RequestHelpers;
 
 namespace KoishopRepositories.Repositories.Extensions
