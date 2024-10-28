@@ -22,6 +22,4 @@ public class OrderCreationDto
     [Required]
     [SwaggerSchema(Description = "Specifies whether the order need to consignment or not.")]
     public bool IsConsignment { get; set; }
-    public decimal? TotalAmount { get; set; }
-    //public int UserId { get; set; }
 }
