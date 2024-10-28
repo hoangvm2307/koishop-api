@@ -1,12 +1,6 @@
 ﻿using DTOs.OrderItem;
-using KoishopBusinessObjects;
 using Swashbuckle.AspNetCore.Annotations;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DTOs.Order;
 
@@ -15,19 +9,6 @@ namespace DTOs.Order;
 /// </summary>
 public class OrderCreationDto
 {
-    ///// <summary>
-    ///// The date and time when the order was created. Defaults to the current date and time.
-    ///// </summary>
-    //[SwaggerSchema(Description = "The date and time when the order was created. Defaults to the current date and time.")]
-    //public DateTime OrderDate { get; set; } = DateTime.Now;
-
-    ///// <summary>
-    ///// The ID of the user placing the order.
-    ///// </summary>
-    //[Required]
-    //[SwaggerSchema(Description = "The ID of the user placing the order.")]
-    //public int UserId { get; set; }
-
     /// <summary>
     /// A list of items that are part of this order.
     /// </summary>
@@ -41,4 +22,6 @@ public class OrderCreationDto
     [Required]
     [SwaggerSchema(Description = "Specifies whether the order need to consignment or not.")]
     public bool IsConsignment { get; set; }
+    public decimal? TotalAmount { get; set; }
+    //public int UserId { get; set; }
 }

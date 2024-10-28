@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using DTOs.Consignment;
 using KoishopBusinessObjects;
+using KoishopBusinessObjects.Constants;
 using KoishopRepositories.Interfaces;
 using KoishopServices.Interfaces;
 
@@ -31,15 +32,26 @@ public class ConsignmentService : IConsignmentService
         {
             throw new ArgumentException("ConsignmentType is required.");
         }
-        if (consignmentCreationDto.Price <= 0)
-        {
-            throw new ArgumentException("Price must be greater than zero.");
-        }
         if (string.IsNullOrEmpty(consignmentCreationDto.Status))
         {
             throw new ArgumentException("Status is required.");
         }
+
         var consignment = _mapper.Map<Consignment>(consignmentCreationDto);
+
+        switch (consignment.ConsignmentType.ToUpper())
+        {
+            case ConsignmentType.OFFLINE:
+                var days = Math.Abs(((DateTime)consignment.EndDate - consignment.StartDate).Days);
+                var totalOfflineFee = CostConstant.CONSIGNMENT_AMOUNT_OFFLINE * days * consignment.ConsignmentItems.Count;
+                consignment.Price = consignment.ConsignmentItems.Count >= 10 ? totalOfflineFee - totalOfflineFee * CostConstant.CONSIGNMENT_DISCOUNT : totalOfflineFee;
+                break;
+            case ConsignmentType.ONLINE:
+                var totalOnlineFee = CostConstant.CONSIGNMENT_AMOUNT_ONLINE * 30 * consignment.ConsignmentItems.Count;
+                consignment.Price = consignment.ConsignmentItems.Count >= 10 ? totalOnlineFee - totalOnlineFee * CostConstant.CONSIGNMENT_DISCOUNT : totalOnlineFee;
+                break;
+        }
+
         await _consignmentRepository.AddAsync(consignment);
     }
 
