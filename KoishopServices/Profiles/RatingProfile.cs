@@ -1,12 +1,8 @@
 ﻿using AutoMapper;
-using DTOs.Breed;
+using DTOs.AccountDtos;
 using DTOs.Rating;
 using KoishopBusinessObjects;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using KoishopServices.Dtos.Rating;
 
 namespace KoishopServices.Profiles
 {
@@ -14,9 +10,13 @@ namespace KoishopServices.Profiles
     {
         public RatingProfile()
         {
-            CreateMap<RatingDto, Rating>().ReverseMap();
-            CreateMap<RatingCreationDto, Rating>();
-            CreateMap<RatingUpdateDto, Rating>();
+        CreateMap<Rating, RatingDto>()
+            .ForMember(dest => dest.UserDto, opt => opt.MapFrom(src => src.User))
+            .ReverseMap();
+        
+        CreateMap<RatingCreationDto, Rating>();
+        CreateMap<RatingUpdateDto, Rating>();
+        CreateMap<User, UserDto>(); 
         }
     }
 }

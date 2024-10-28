@@ -3,11 +3,6 @@ using DTOs.Consignment;
 using KoishopBusinessObjects;
 using KoishopRepositories.Interfaces;
 using KoishopServices.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace KoishopServices.Services;
 
@@ -23,7 +18,7 @@ public class ConsignmentService : IConsignmentService
     }
     public async Task AddConsignment(ConsignmentCreationDto consignmentCreationDto)
     {
-        //TODO: Add validation before create and mapping
+        // Validation before create and mapping
         if (consignmentCreationDto.StartDate.Date < DateTime.Now.Date)
         {
             throw new ArgumentException("StartDate cannot be in the past.");
@@ -50,7 +45,7 @@ public class ConsignmentService : IConsignmentService
 
     public async Task<ConsignmentDto> GetConsignmentById(int id)
     {
-        var consignment = await _consignmentRepository.GetByIdAsync(id);
+        var consignment = await _consignmentRepository.GetConsignmentByIdAsync(id);
         if (consignment == null)
             return null;
         return _mapper.Map<ConsignmentDto>(consignment);
@@ -58,7 +53,14 @@ public class ConsignmentService : IConsignmentService
 
     public async Task<IEnumerable<ConsignmentDto>> GetListConsignment()
     {
-        var consignments = await _consignmentRepository.GetAllAsync();
+        var consignments = await _consignmentRepository.GetAllConsignmentAsync();
+        var result = _mapper.Map<List<ConsignmentDto>>(consignments);
+        return result;
+    }
+
+    public async Task<IEnumerable<ConsignmentDto>> GetListConsignmentByUserId(int userId)
+    {
+        var consignments = await _consignmentRepository.GetByUserIdAsync(userId);
         var result = _mapper.Map<List<ConsignmentDto>>(consignments);
         return result;
     }

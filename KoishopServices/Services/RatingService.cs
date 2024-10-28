@@ -1,23 +1,14 @@
 ﻿using AutoMapper;
-using DTOs.Breed;
-using DTOs.Order;
 using DTOs.Rating;
 using KoishopBusinessObjects;
 using KoishopBusinessObjects.Constants;
 using KoishopRepositories.Interfaces;
-using KoishopRepositories.Repositories;
 using KoishopServices.Common.Exceptions;
 using KoishopServices.Common.Pagination;
 using KoishopServices.Dtos.Rating;
 using KoishopServices.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics.Metrics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace KoishopServices.Services
 {
@@ -56,6 +47,7 @@ namespace KoishopServices.Services
             }
 
             var rating = _mapper.Map<Rating>(ratingCreationDto);
+            rating.DateCreated = DateTime.Now;
             await _ratingRepository.AddAsync(rating);
         }
 
@@ -96,9 +88,14 @@ namespace KoishopServices.Services
 
         public async Task<IEnumerable<RatingDto>> GetListRating()
         {
-            var ratings = await _ratingRepository.GetAllAsync();
-            var result = _mapper.Map<List<RatingDto>>(ratings);
-            return result;
+            var ratings = await _ratingRepository.GetListAsync();
+            var ratingDtos = _mapper.Map<List<RatingDto>>(ratings);
+            foreach (var rating in ratingDtos)
+            {
+                var username = await _userManager.FindByIdAsync(rating.UserId.ToString());
+                rating.UserName = username.UserName;
+            }
+            return ratingDtos;
         }
 
         public async Task<RatingDto> GetRatingById(int id, CancellationToken cancellationToken)
