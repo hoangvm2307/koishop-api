@@ -1,5 +1,6 @@
 ﻿using DTOs.Breed;
 using DTOs.Consignment;
+using DTOs.ConsignmentItem;
 using DTOs.FishCare;
 using DTOs.OrderItem;
 using KoishopBusinessObjects;
@@ -27,7 +28,7 @@ public class KoiFishDto
     public int? BreedId { get; set; }
     public virtual BreedDto? Breed { get; set; }
     public virtual ICollection<OrderItemDto>? OrderItems { get; set; }
-    public virtual ICollection<ConsignmentDto>? ConsignmentItems { get; set; }
+    public virtual ICollection<ConsignmentItemDto>? ConsignmentItems { get; set; }
     public virtual ICollection<RatingDto>? Ratings { get; set; }
     public virtual ICollection<FishCareDto>? FishCare { get; set; }
 }
