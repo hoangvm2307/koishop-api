@@ -1,4 +1,3 @@
-
 using KoishopBusinessObjects;
 
 namespace UberSystem.Domain.Interfaces.Services

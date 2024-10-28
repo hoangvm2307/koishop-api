@@ -3,11 +3,6 @@ using DTOs.Breed;
 using KoishopBusinessObjects;
 using KoishopRepositories.Interfaces;
 using KoishopServices.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace KoishopServices.Services;
 

@@ -1,14 +1,10 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using KoishopBusinessObjects;
 using KoishopRepositories;
 using Microsoft.AspNetCore.Identity;
 
 namespace KoishopWebAPI.Data
 {
-  public class DBInitializer
+    public class DBInitializer
   {
     public static async Task Initialize(KoishopDBContext context, UserManager<User> userManager)
     {

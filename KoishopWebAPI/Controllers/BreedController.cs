@@ -1,7 +1,5 @@
 ﻿using DTOs.Breed;
 using KoishopServices.Interfaces;
-using Microsoft.AspNetCore.Cors.Infrastructure;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace KoishopWebAPI.Controllers;
@@ -15,6 +13,10 @@ public class BreedController : BaseApiController
         _breedService = breedService;
     }
 
+    /// <summary>
+    /// Get all breed list
+    /// </summary>
+    /// <returns></returns>
     [HttpGet]
     public async Task<ActionResult<List<BreedDto>>> GetBreeds()
     {
@@ -22,6 +24,11 @@ public class BreedController : BaseApiController
         return Ok(breeds);
     }
 
+    /// <summary>
+    /// Add a new breed
+    /// </summary>
+    /// <param name="breedCreationDto"></param>
+    /// <returns></returns>
     [HttpPost]
     public async Task<ActionResult> CreateBreed([FromForm] BreedCreationDto breedCreationDto)
     {
@@ -29,6 +36,11 @@ public class BreedController : BaseApiController
         return CreatedAtAction(nameof(GetBreeds), breedCreationDto);
     }
 
+    /// <summary>
+    /// get a detail breed's infromation
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
     [HttpGet("{id}")]
     public async Task<ActionResult<BreedDto>> GetBreedById(int id)
     {
@@ -38,6 +50,12 @@ public class BreedController : BaseApiController
         return Ok(breed);
     }
 
+    /// <summary>
+    /// Update breed's information
+    /// </summary>
+    /// <param name="id"></param>
+    /// <param name="breedUpdateDto"></param>
+    /// <returns></returns>
     [HttpPut("{id}")]
     public async Task<ActionResult> UpdateBreed(int id, BreedUpdateDto breedUpdateDto)
     {
@@ -47,6 +65,11 @@ public class BreedController : BaseApiController
         return NoContent();
     }
 
+    /// <summary>
+    /// Delete a breed
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
     [HttpDelete("{id}")]
     public async Task<ActionResult> DeleteBreed(int id)
     {

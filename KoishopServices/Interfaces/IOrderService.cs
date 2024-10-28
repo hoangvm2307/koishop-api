@@ -1,13 +1,6 @@
 ﻿using DTOs.Order;
-using DTOs.OrderItem;
-using KoishopBusinessObjects;
 using KoishopServices.Common.Pagination;
 using KoishopServices.Dtos.Order;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace KoishopServices.Interfaces;
 
