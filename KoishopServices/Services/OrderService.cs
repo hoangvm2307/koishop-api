@@ -1,30 +1,18 @@
 ﻿using AutoMapper;
-using DTOs.KoiFish;
 using DTOs.Order;
-using DTOs.OrderItem;
-using DTOs.Rating;
 using KoishopBusinessObjects;
 using KoishopBusinessObjects.Constants;
-using KoishopBusinessObjects.VnPayModel;
 using KoishopRepositories.Interfaces;
 using KoishopServices.Common.Exceptions;
 using KoishopServices.Common.Interface;
 using KoishopServices.Common.Pagination;
 using KoishopServices.Dtos.Order;
-using KoishopServices.Dtos.Rating;
 using KoishopServices.Interfaces;
 using KoishopServices.Interfaces.Third_Party;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
+using UberSystem.Domain.Interfaces.Services;
 
 namespace KoishopServices.Services;
 
@@ -40,7 +28,7 @@ public class OrderService : IOrderService
     private readonly ICurrentUserService _currentUserService;
     private readonly IConsignmentItemRepository _consignmentItemRepository;
     private readonly IConsignmentRepository _consignmentRepository;
-
+    private readonly IEmailService _emailService;
 
     public OrderService(IMapper mapper
         , IOrderRepository orderRepository
@@ -51,23 +39,25 @@ public class OrderService : IOrderService
         , IHttpContextAccessor httpContextAccessor
         , ICurrentUserService currentUserService
         , IConsignmentItemRepository consignmentItemRepository
-        , IConsignmentRepository consignmentRepository)
+        , IConsignmentRepository consignmentRepository
+        , IEmailService emailService)
     {
-        this._mapper = mapper;
-        this._userManager = userManager;
-        this._orderRepository = orderRepository;
-        this._orderItemRepository = orderItemRepository;
-        this._koiFishRepository = koiFishRepository;
-        this._vnPayService = vnPayService;
-        this._httpContextAccessor = httpContextAccessor;
-        this._currentUserService = currentUserService;
+        _mapper = mapper;
+        _userManager = userManager;
+        _orderRepository = orderRepository;
+        _orderItemRepository = orderItemRepository;
+        _koiFishRepository = koiFishRepository;
+        _vnPayService = vnPayService;
+        _httpContextAccessor = httpContextAccessor;
+        _currentUserService = currentUserService;
         _consignmentItemRepository = consignmentItemRepository;
         _consignmentRepository = consignmentRepository;
+        _emailService = emailService;
     }
     public async Task<OrderDto> AddOrder(OrderCreationDto orderCreationDto, CancellationToken cancellationToken)
     {
         //TODO: Add validation before create and mapping
-        var customer = await _userManager.FindByIdAsync(_currentUserService.UserId);
+        var customer = await _userManager.FindByIdAsync("1");
         if (customer == null)
         {
             throw new NotFoundException(ExceptionConstants.USER_NOT_EXIST);
@@ -83,8 +73,10 @@ public class OrderService : IOrderService
         order.OrderDate = DateTime.UtcNow;
         order.Status = OrderStatus.PENDING;
         await _orderRepository.AddAsync(order);
+
         List<OrderItem> orderItems = new List<OrderItem>();
-        foreach(var orderItemDto in orderCreationDto.OrderItemCreationDtos)
+        decimal totalAmount = 0;
+        foreach (var orderItemDto in orderCreationDto.OrderItemCreationDtos)
         {
             var koiFish = await _koiFishRepository.FindAsync(x => x.Id == orderItemDto.KoiFishId && x.isDeleted == false, cancellationToken);
             if (koiFish == null)
@@ -95,16 +87,18 @@ public class OrderService : IOrderService
             {
                 throw new ValidationException(ExceptionConstants.INVALID_KOIFISH_STATUS);
             }
+
             var orderItem = _mapper.Map<OrderItem>(orderItemDto);
-            orderItem.Price = koiFish.Price; // check lại
+            orderItem.Price = koiFish.Price;
+            totalAmount += koiFish.Price;
             orderItem.OrderId = order.Id;
             orderItems.Add(orderItem);
             await _orderItemRepository.AddAsync(orderItem);
         }
         order.OrderItems = orderItems;
         order.Quantity = orderItems.Count;
-        // Total ammount -> tính tiền
-        order.TotalAmount = 10000; // chưa có func của Ngọc
+        if (!order.IsConsignment) order.TotalAmount = order.Quantity >= 10 ? totalAmount * CostConstant.WHOLESALE_DISCOUNT : totalAmount;
+
         await _orderRepository.UpdateAsync(order);
         await _userManager.UpdateAsync(customer);
         order.User = customer;
@@ -194,7 +188,7 @@ public class OrderService : IOrderService
         {
             throw new NotFoundException(ExceptionConstants.USER_NOT_EXIST + _currentUserService.UserId);
         }
-        var order = await _orderRepository.FindAsync(x => x.Id ==  id && x.isDeleted == false, cancellationToken);
+        var order = await _orderRepository.FindAsync(x => x.Id == id && x.isDeleted == false, cancellationToken);
         if (order == null)
         {
             throw new NotFoundException(ExceptionConstants.ORDER_NOT_EXIST + id);
@@ -216,7 +210,7 @@ public class OrderService : IOrderService
             if (koifish.Status != KoiFishStatus.AVAILABLE)
             {
                 throw new ValidationException(ExceptionConstants.INVALID_KOIFISH_STATUS);
-            }           
+            }
             koifishes.Add(koifish);
         }
         //Handle ký gửi
@@ -231,6 +225,8 @@ public class OrderService : IOrderService
                     koi.UserId = customer.Id;
                     await _koiFishRepository.UpdateAsync(koi);
                 }
+
+                await _emailService.SendEmailVerificationAsync(customer.Email, koifishes, order);
                 break;
             case true:
                 Consignment consignment = new Consignment();
@@ -256,7 +252,7 @@ public class OrderService : IOrderService
                         DateCreated = DateTime.Now,
                         CreatedBy = customer.UserName,
                         KoiFishId = koi.Id,
-                        Price = 0,                       
+                        Price = 0,
                     };
                     await _consignmentItemRepository.AddAsync(consignmentItem);
                     await _koiFishRepository.UpdateAsync(koi);
@@ -264,7 +260,7 @@ public class OrderService : IOrderService
                 consignment.ConsignmentItems = consignmentItems;
                 await _consignmentRepository.UpdateAsync(consignment);
                 break;
-        }     
+        }
         order.DateModified = DateTime.Now;
         await _orderRepository.UpdateAsync(order);
         return true;
@@ -276,7 +272,7 @@ public class OrderService : IOrderService
         {
             throw new ValidationException(ExceptionConstants.INVALID_ORDER_STATUS);
         }
-        var order = await _orderRepository.FindAsync(x => x.Id ==  orderStatusUpdateDto.Id && x.isDeleted == false, cancellationToken);
+        var order = await _orderRepository.FindAsync(x => x.Id == orderStatusUpdateDto.Id && x.isDeleted == false, cancellationToken);
         if (order == null)
         {
             throw new NotFoundException(ExceptionConstants.ORDER_NOT_EXIST + orderStatusUpdateDto.Id);
@@ -287,7 +283,7 @@ public class OrderService : IOrderService
     }
 
     public async Task<PagedResult<OrderDto>> FilterOrder(FilterOrderDto filterOrderDto, CancellationToken cancellationToken)
-    {    
+    {
         Func<IQueryable<Order>, IQueryable<Order>> queryOptions = query =>
         {
             query = query.Include(item => item.OrderItems.Where(i => i.isDeleted == false))
@@ -316,14 +312,14 @@ public class OrderService : IOrderService
                 query = filterOrderDto.IsDescending
                     ? query.OrderByDescending(e => EF.Property<object>(e, filterOrderDto.SortBy))
                     : query.OrderBy(e => EF.Property<object>(e, filterOrderDto.SortBy));
-            }         
+            }
             return query;
         };
 
         var result = await _orderRepository.FindAllAsync(filterOrderDto.PageNumber, filterOrderDto.PageSize, queryOptions, cancellationToken);
         var koifishName = await _koiFishRepository.FindAllToDictionaryAsync(x => x.isDeleted == false, x => x.Id, x => x.Name, cancellationToken);
         Dictionary<int, string> users = new Dictionary<int, string>();
-        foreach(var order in result)
+        foreach (var order in result)
         {
             if (!users.ContainsValue(order.User.UserName))
             {

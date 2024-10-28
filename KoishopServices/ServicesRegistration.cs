@@ -9,6 +9,8 @@ using System.Reflection;
 using KoishopServices.Interfaces;
 using KoishopServices.Services;
 using KoishopServices.Interfaces.Third_Party;
+using UberSystem.Domain.Interfaces.Services;
+using UberSystem.Service;
 
 namespace KoishopServices;
 
@@ -28,6 +30,7 @@ public static class ServicesRegistration
         services.AddScoped<IOrderService, OrderService>();
         services.AddScoped<IRatingService, RatingService>();
         services.AddScoped<IVnPayService, VnPayService>();
+        services.AddScoped<IEmailService, EmailService>();
         return services;
     }
 }
