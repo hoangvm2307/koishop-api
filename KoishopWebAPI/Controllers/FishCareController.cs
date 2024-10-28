@@ -1,6 +1,5 @@
 ﻿using DTOs.FishCare;
 using KoishopServices.Interfaces;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace KoishopWebAPI.Controllers;
@@ -13,6 +12,10 @@ public class FishCareController : BaseApiController
         _fishCareService = fishCareService;
     }
 
+    /// <summary>
+    /// Get all fishcare list
+    /// </summary>
+    /// <returns></returns>
     [HttpGet]
     public async Task<ActionResult<List<FishCareDto>>> GetFishCares()
     {
@@ -20,6 +23,11 @@ public class FishCareController : BaseApiController
         return Ok(fishCares);
     }
 
+    /// <summary>
+    /// Add a new fishcare to system
+    /// </summary>
+    /// <param name="fishCareCreationDto"></param>
+    /// <returns></returns>
     [HttpPost]
     public async Task<ActionResult> CreateFishCare(FishCareCreationDto fishCareCreationDto)
     {
@@ -27,6 +35,11 @@ public class FishCareController : BaseApiController
         return CreatedAtAction(nameof(GetFishCares), fishCareCreationDto);
     }
 
+    /// <summary>
+    /// Get detail fishcare's information
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
     [HttpGet("{id}")]
     public async Task<ActionResult<FishCareDto>> GetFishCareById(int id)
     {
@@ -36,6 +49,12 @@ public class FishCareController : BaseApiController
         return Ok(fishCare);
     }
 
+    /// <summary>
+    /// Update fishcare's information
+    /// </summary>
+    /// <param name="id"></param>
+    /// <param name="fishCareUpdateDto"></param>
+    /// <returns></returns>
     [HttpPut("{id}")]
     public async Task<ActionResult> UpdateFishCare(int id, FishCareUpdateDto fishCareUpdateDto)
     {
@@ -45,6 +64,11 @@ public class FishCareController : BaseApiController
         return NoContent();
     }
 
+    /// <summary>
+    /// Delete a fishcare
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
     [HttpDelete("{id}")]
     public async Task<ActionResult> DeleteFishCare(int id)
     {

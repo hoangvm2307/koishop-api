@@ -1,5 +1,4 @@
-﻿using DTOs.Breed;
-using DTOs.Rating;
+﻿using DTOs.Rating;
 using KoishopServices.Common.Pagination;
 using KoishopServices.Dtos.Rating;
 using KoishopServices.Interfaces;
@@ -15,6 +14,7 @@ namespace KoishopWebAPI.Controllers
         {
             _ratingService = ratingService;
         }
+        
         /// <summary>
         /// Retrieves a list of all ratings with filter and sorting.
         /// </summary>

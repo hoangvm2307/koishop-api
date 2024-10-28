@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace KoishopWebAPI.Data
 {
-  public class DBInitializer
+    public class DBInitializer
   {
     public static async Task Initialize(KoishopDBContext identityContext, KoishopContext persistenceContext, UserManager<User> userManager)
     {

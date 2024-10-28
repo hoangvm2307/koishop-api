@@ -1,12 +1,6 @@
-﻿using DTOs.Breed;
-using DTOs.Rating;
+﻿using DTOs.Rating;
 using KoishopServices.Common.Pagination;
 using KoishopServices.Dtos.Rating;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace KoishopServices.Interfaces
 {

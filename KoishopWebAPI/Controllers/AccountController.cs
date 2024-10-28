@@ -1,14 +1,10 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using DTOs.AccountDtos;
 using KoishopServices;
 using Microsoft.AspNetCore.Mvc;
 
 namespace KoishopWebAPI.Controllers
 {
-  public class AccountController : BaseApiController
+    public class AccountController : BaseApiController
   {
         private readonly IAccountService _accountService;
         public AccountController(IAccountService accountService)

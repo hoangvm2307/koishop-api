@@ -1,11 +1,4 @@
-﻿using DTOs.KoiFish;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace DTOs.FishCare;
+﻿namespace DTOs.FishCare;
 
 public class FishCareUpdateDto
 {

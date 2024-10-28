@@ -1,10 +1,4 @@
-﻿using DTOs.Consignment;
-using DTOs.FishCare;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using DTOs.FishCare;
 
 namespace KoishopServices.Interfaces;
 
