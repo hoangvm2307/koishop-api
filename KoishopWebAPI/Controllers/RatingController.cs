@@ -14,6 +14,7 @@ namespace KoishopWebAPI.Controllers
         {
             _ratingService = ratingService;
         }
+        
         /// <summary>
         /// Retrieves a list of all ratings with filter and sorting.
         /// </summary>
