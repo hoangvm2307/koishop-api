@@ -57,13 +57,17 @@ public class OrderService : IOrderService
     public async Task<OrderDto> AddOrder(OrderCreationDto orderCreationDto, CancellationToken cancellationToken)
     {
         //TODO: Add validation before create and mapping
-        var customer = await _userManager.FindByIdAsync("1");
+        var customer = await _userManager.FindByIdAsync(_currentUserService.UserId);
         if (customer == null)
         {
             throw new NotFoundException(ExceptionConstants.USER_NOT_EXIST);
         }
-        var koiFishIds = orderCreationDto.OrderItemCreationDtos.Select(x => x.KoiFishId).Where(id => id.HasValue).Distinct();
-        if (koiFishIds.Count() > 1)
+        var koiFishIds = orderCreationDto.OrderItemCreationDtos
+                            .Where(x => x.KoiFishId.HasValue)
+                            .Select(x => x.KoiFishId.Value)
+                            .ToList();
+
+        if (koiFishIds.Count != koiFishIds.Distinct().Count())
         {
             throw new DuplicationException(ExceptionConstants.ORDER_ITEM_DUPLICATE_INPUT_KOIFISH_ID);
         }
@@ -229,16 +233,17 @@ public class OrderService : IOrderService
                 await _emailService.SendEmailVerificationAsync(customer.Email, koifishes, order);
                 break;
             case true:
-                Consignment consignment = new Consignment();
-                order.Status = OrderStatus.HOLDING;
-                consignment.ConsignmentType = ConsignmentType.OFFLINE;
-                consignment.Status = ConsignmentStatus.APPROVED;
-                consignment.DateCreated = DateTime.Now;
-                consignment.StartDate = DateTime.UtcNow;
-                consignment.CreatedBy = customer.UserName;
-                consignment.EndDate = consignment.StartDate.AddDays(30); // 30 ngày free, sau đó tính tiền thêm 
-                consignment.Price = 0;
-                consignment.UserID = customer.Id;
+                Consignment consignment = new Consignment
+                {
+                    ConsignmentType = ConsignmentType.OFFLINE,
+                    Status = ConsignmentStatus.APPROVED,
+                    DateCreated = DateTime.Now,
+                    StartDate = DateTime.UtcNow,
+                    CreatedBy = customer.UserName,
+                    EndDate = DateTime.UtcNow.AddDays(30), // 30 ngày miễn phí
+                    Price = 0,
+                    UserID = customer.Id,
+                };
                 await _consignmentRepository.AddAsync(consignment);
                 List<ConsignmentItem> consignmentItems = new List<ConsignmentItem>();
                 foreach (var koi in koifishes)
@@ -256,6 +261,7 @@ public class OrderService : IOrderService
                     };
                     await _consignmentItemRepository.AddAsync(consignmentItem);
                     await _koiFishRepository.UpdateAsync(koi);
+                    consignmentItems.Add(consignmentItem);
                 }
                 consignment.ConsignmentItems = consignmentItems;
                 await _consignmentRepository.UpdateAsync(consignment);
