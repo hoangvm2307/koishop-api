@@ -38,7 +38,7 @@ public class KoiFishController : BaseApiController
     }
 
     /// <summary>
-    /// Creates a new koi fish.
+    /// Create a new koi fish.
     /// </summary>
     /// <param name="koiFishCreationDto">The data for the new koi fish.</param>
     /// <returns>Returns the created koi fish information.</returns>
@@ -46,6 +46,19 @@ public class KoiFishController : BaseApiController
     public async Task<ActionResult> CreateKoiFish([FromBody] KoiFishCreationDto koiFishCreationDto)
     {
         await _koiFishService.AddKoiFish(koiFishCreationDto);
+        return CreatedAtAction(nameof(GetKoiFishs), koiFishCreationDto);
+    }
+
+    /// <summary>
+    /// Create a new koi fish with userId
+    /// </summary>
+    /// <param name="koiFishCreationDto"></param>
+    /// <param name="userId"></param>
+    /// <returns></returns>
+    [HttpPost("{userId}")]
+    public async Task<ActionResult> CreateKoiFishWithUser([FromBody] KoiFishCreationDto koiFishCreationDto, string userId)
+    {
+        await _koiFishService.AddKoiFishWithUser(koiFishCreationDto, userId);
         return CreatedAtAction(nameof(GetKoiFishs), koiFishCreationDto);
     }
 
@@ -68,7 +81,7 @@ public class KoiFishController : BaseApiController
     /// <param name="ids"></param>
     /// <returns></returns>
     [HttpGet("list-ids")]
-    public async Task<ActionResult<List<KoiFishDto>>> GetKoiFishByIds([FromQuery]int[] ids)
+    public async Task<ActionResult<List<KoiFishDto>>> GetKoiFishByIds([FromQuery] int[] ids)
     {
         var koiFish = await _koiFishService.GetKoiFishByIds(ids.ToList());
         if (koiFish == null)
@@ -76,7 +89,12 @@ public class KoiFishController : BaseApiController
         return Ok(koiFish);
     }
 
-    
+
+    /// <summary>
+    /// Get related fish list
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
     [HttpGet("related/{id}")]
     public async Task<ActionResult<List<KoiFishDto>>> GetRelatedKoiFishBy(int id)
     {
