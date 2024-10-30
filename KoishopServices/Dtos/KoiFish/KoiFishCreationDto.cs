@@ -79,9 +79,4 @@ public class KoiFishCreationDto
     [SwaggerSchema(Description = "The status of the Koi Fish. Allowed values are: AVAILABLE, SOLD, RESERVED.")]
     public string? Status { get; set; }
 
-    /// <summary>
-    /// The ID of the user who created the Koi Fish entry.
-    /// </summary>
-    [SwaggerSchema(Description = "The ID of the user who created the Koi Fish entry.")]
-    public int? UserId { get; set; }
 }
