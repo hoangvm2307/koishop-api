@@ -93,6 +93,14 @@ public class OrderService : IOrderService
             }
 
             var orderItem = _mapper.Map<OrderItem>(orderItemDto);
+            if (koiFish.UserId.HasValue)
+            {
+                orderItem.Type = OrderItemType.CONSIGNMENT_ONLINE;
+            }
+            else
+            {
+                orderItem.Type = OrderItemType.SHOP_OWNER;
+            }
             orderItem.Price = koiFish.Price;
             totalAmount += koiFish.Price;
             orderItem.OrderId = order.Id;
@@ -101,7 +109,7 @@ public class OrderService : IOrderService
         }
         order.OrderItems = orderItems;
         order.Quantity = orderItems.Count;
-        if (!order.IsConsignment) order.TotalAmount = order.Quantity >= 10 ? totalAmount * CostConstant.WHOLESALE_DISCOUNT : totalAmount;
+       /* if (!order.IsConsignment)*/ order.TotalAmount = order.Quantity >= 10 ? totalAmount * CostConstant.WHOLESALE_DISCOUNT : totalAmount;
 
         await _orderRepository.UpdateAsync(order);
         await _userManager.UpdateAsync(customer);
@@ -175,12 +183,31 @@ public class OrderService : IOrderService
                     throw new ValidationException(ExceptionConstants.INVALID_KOIFISH_STATUS);
                 }
                 var newOrderItem = _mapper.Map<OrderItem>(updateItem.Value);
+                if (koiFish.UserId.HasValue)
+                {
+                    newOrderItem.Type = OrderItemType.CONSIGNMENT_ONLINE;
+                }
+                else
+                {
+                    newOrderItem.Type = OrderItemType.SHOP_OWNER;
+                }
                 newOrderItem.Price = koiFish.Price; // check lại
                 existingOrder.OrderItems.Add(newOrderItem);
                 await _orderItemRepository.AddAsync(newOrderItem);
             }
         }
+
         //TODO: tính lại total price của order - Đợi Ngọc
+        decimal totalAmount = 0;
+        foreach (var item in existingOrder.OrderItems)
+        {
+            if (item.isDeleted == false)
+            {
+                totalAmount += item.Price;
+            }
+        }
+        if (!existingOrder.IsConsignment) 
+            existingOrder.TotalAmount = existingOrder.Quantity >= 10 ? totalAmount * CostConstant.WHOLESALE_DISCOUNT : totalAmount;
         await _orderRepository.UpdateAsync(existingOrder);
         return true;
     }
@@ -226,13 +253,31 @@ public class OrderService : IOrderService
                 {
                     koi.Status = KoiFishStatus.SOLD;
                     koi.DateModified = DateTime.Now;
+                    // trả tiền cho chủ cá
+                    if (koi.UserId != null)
+                    {
+                        var fishOwner = await _userManager.FindByIdAsync(koi.UserId.ToString());
+                        fishOwner.Wallet += koi.Price - (koi.Price * CostConstant.COMMISSION_CHARGE);
+
+                        var currentConsignment = await _consignmentRepository.FindAsync(consignment => consignment.UserID == koi.UserId 
+                            && consignment.ConsignmentType == ConsignmentType.ONLINE
+                            && consignment.Status == ConsignmentStatus.APPROVED
+                            && consignment.EndDate >= DateTime.UtcNow
+                            && consignment.ConsignmentItems.Any(item => item.KoiFishId == koi.Id));
+                        currentConsignment.EndDate = DateTime.UtcNow;
+                        currentConsignment.Status = ConsignmentStatus.COMPLETED;
+                        await _consignmentRepository.UpdateAsync(currentConsignment);
+                        await _userManager.UpdateAsync(fishOwner);
+                    }
+                    // Set owner mới cho cá
                     koi.UserId = customer.Id;
+                    // Này chạy happy case chứ kh có UnitOfWork thì sẽ xảy ra chuyện con được con mất
                     await _koiFishRepository.UpdateAsync(koi);
                 }
-
                 await _emailService.SendEmailVerificationAsync(customer.Email, koifishes, order);
                 break;
             case true:
+                // khởi tạo consignment mới
                 Consignment consignment = new Consignment
                 {
                     ConsignmentType = ConsignmentType.OFFLINE,
@@ -246,8 +291,27 @@ public class OrderService : IOrderService
                 };
                 await _consignmentRepository.AddAsync(consignment);
                 List<ConsignmentItem> consignmentItems = new List<ConsignmentItem>();
+
                 foreach (var koi in koifishes)
                 {
+                    // Trả tiền cho chủ cá + hoàn tất consignment online của họ
+                    if (koi.UserId.HasValue)
+                    {
+                        var fishOwner = await _userManager.FindByIdAsync(koi.UserId.ToString());
+                        fishOwner.Wallet += koi.Price - (koi.Price * CostConstant.COMMISSION_CHARGE);
+
+                        var currentConsignment = await _consignmentRepository.FindAsync(x =>
+                            x.UserID == koi.UserId.Value
+                            && x.ConsignmentType == ConsignmentType.ONLINE
+                            && x.Status == ConsignmentStatus.APPROVED
+                            && x.EndDate >= DateTime.UtcNow
+                            && x.ConsignmentItems!.Any(item => item.KoiFishId == koi.Id), cancellationToken);
+                        currentConsignment.EndDate = DateTime.UtcNow;
+                        currentConsignment.Status = ConsignmentStatus.COMPLETED;
+                        await _consignmentRepository.UpdateAsync(currentConsignment);
+                        await _userManager.UpdateAsync(fishOwner);
+                    }
+                 
                     koi.Status = KoiFishStatus.RESERVED;
                     koi.DateModified = DateTime.Now;
                     koi.UserId = customer.Id;
@@ -258,12 +322,13 @@ public class OrderService : IOrderService
                         CreatedBy = customer.UserName,
                         KoiFishId = koi.Id,
                         Price = 0,
-                    };
+                    };  
                     await _consignmentItemRepository.AddAsync(consignmentItem);
                     await _koiFishRepository.UpdateAsync(koi);
                     consignmentItems.Add(consignmentItem);
                 }
                 consignment.ConsignmentItems = consignmentItems;
+                order.Status = OrderStatus.HOLDING;
                 await _consignmentRepository.UpdateAsync(consignment);
                 break;
         }
@@ -341,4 +406,6 @@ public class OrderService : IOrderService
                pageNumber: result.PageNo,
                data: result.MapToOrderDtoList(_mapper, users, koifishName));
     }
+
+
 }

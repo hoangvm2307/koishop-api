@@ -5,6 +5,7 @@ using KoishopBusinessObjects.Constants;
 using KoishopRepositories.Interfaces;
 using KoishopRepositories.Repositories.RequestHelpers;
 using KoishopServices.Common.Exceptions;
+using KoishopServices.Common.Interface;
 using KoishopServices.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
@@ -16,23 +17,20 @@ public class KoiFishService : IKoiFishService
     private readonly IMapper _mapper;
     private readonly IKoiFishRepository _koifishRepository;
     private readonly UserManager<User> _userManager;
+    private readonly ICurrentUserService _currentUserService;
 
     public KoiFishService(IMapper mapper
         , IKoiFishRepository koifishRepository
-        , UserManager<User> userManager)
+        , UserManager<User> userManager
+        , ICurrentUserService currentUserService)
     {
         this._mapper = mapper;
         _userManager = userManager;
         this._koifishRepository = koifishRepository;
+        _currentUserService = currentUserService;
     }
     public async Task AddKoiFish(KoiFishCreationDto koifishCreationDto)
     {
-        var user = await _userManager.FindByIdAsync(koifishCreationDto.UserId.Value.ToString());
-        if (user == null)
-        {
-            throw new NotFoundException(ExceptionConstants.USER_NOT_EXIST);
-        }
-
         // VALIDATE INPUT CONST
         if (!new[] { KoiFishGender.MALE, KoiFishGender.FEMALE, KoiFishGender.UNKNOWN }.Contains(koifishCreationDto.Gender))
         {
@@ -53,13 +51,13 @@ public class KoiFishService : IKoiFishService
             throw new ValidationException(ExceptionConstants.INVALID_PRICE);
         }
         var koifish = _mapper.Map<KoiFish>(koifishCreationDto);
-        koifish.UserId = user.Id;
+        koifish.CreatedBy = _currentUserService.UserId;
         await _koifishRepository.AddAsync(koifish);
     }
 
     public async Task AddKoiFishWithUser(KoiFishCreationDto koifishCreationDto, string userId)
     {
-        var user = await _userManager.FindByIdAsync(koifishCreationDto.UserId.Value.ToString());
+        var user = await _userManager.FindByIdAsync(userId);
         if (user == null)
         {
             throw new NotFoundException(ExceptionConstants.USER_NOT_EXIST);
