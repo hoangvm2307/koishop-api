@@ -11,6 +11,7 @@ public interface IKoiFishService
     Task<FilterKoiFishParamDto> GetFilterParam();
     Task<List<KoiFishDto>> GetKoiFishByIds(List<int> ids);
     Task AddKoiFish(KoiFishCreationDto koiFishCreationDto);
+    Task AddKoiFishWithUser(KoiFishCreationDto koifishCreationDto, string userId);
     Task<bool> UpdateKoiFish(int id, KoiFishUpdateDto koiFishUpdateDto);
     Task<bool> RemoveKoiFish(int id);
 }

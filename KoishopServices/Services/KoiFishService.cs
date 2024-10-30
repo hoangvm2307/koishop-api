@@ -31,7 +31,7 @@ public class KoiFishService : IKoiFishService
         if (user == null)
         {
             throw new NotFoundException(ExceptionConstants.USER_NOT_EXIST);
-        }   
+        }
 
         // VALIDATE INPUT CONST
         if (!new[] { KoiFishGender.MALE, KoiFishGender.FEMALE, KoiFishGender.UNKNOWN }.Contains(koifishCreationDto.Gender))
@@ -54,6 +54,41 @@ public class KoiFishService : IKoiFishService
         }
         var koifish = _mapper.Map<KoiFish>(koifishCreationDto);
         koifish.UserId = user.Id;
+        await _koifishRepository.AddAsync(koifish);
+    }
+
+    public async Task AddKoiFishWithUser(KoiFishCreationDto koifishCreationDto, string userId)
+    {
+        var user = await _userManager.FindByIdAsync(koifishCreationDto.UserId.Value.ToString());
+        if (user == null)
+        {
+            throw new NotFoundException(ExceptionConstants.USER_NOT_EXIST);
+        }
+
+        // VALIDATE INPUT CONST
+        if (!new[] { KoiFishGender.MALE, KoiFishGender.FEMALE, KoiFishGender.UNKNOWN }.Contains(koifishCreationDto.Gender))
+        {
+            throw new ValidationException(ExceptionConstants.INVALID_KOIFISH_GENDER);
+        }
+        if (!new[] { KoiFishStatus.AVAILABLE, KoiFishStatus.SOLD, KoiFishStatus.RESERVED }.Contains(koifishCreationDto.Status))
+        {
+            throw new ValidationException(ExceptionConstants.INVALID_KOIFISH_TYPE);
+        }
+        if (!new[] { KoiFishType.PUREIMPORTED, KoiFishType.HYBRIDF1, KoiFishType.PUREVIETNAMESE }.Contains(koifishCreationDto.Type))
+        {
+            throw new ValidationException(ExceptionConstants.INVALID_KOIFISH_TYPE);
+        }
+
+        // VALIDATE PRICE
+        if (koifishCreationDto.Price < 0 || koifishCreationDto.ListPrice < 0)
+        {
+            throw new ValidationException(ExceptionConstants.INVALID_PRICE);
+        }
+
+        var koifish = _mapper.Map<KoiFish>(koifishCreationDto);
+        koifish.UserId = user.Id;
+        koifish.CreatedBy = userId;
+
         await _koifishRepository.AddAsync(koifish);
     }
 
@@ -91,7 +126,8 @@ public class KoiFishService : IKoiFishService
 
     public async Task<FilterKoiFishParamDto> GetFilterParam()
     {
-        return new FilterKoiFishParamDto {
+        return new FilterKoiFishParamDto
+        {
             MaxPrice = _koifishRepository.GetMaxPrices(),
             MinPrice = _koifishRepository.GetMinPrices(),
             MaxAge = _koifishRepository.GetMaxAge(),
