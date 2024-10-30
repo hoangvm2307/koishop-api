@@ -58,8 +58,8 @@ public class KoiFishController : BaseApiController
     [HttpPost("{userId}")]
     public async Task<ActionResult> CreateKoiFishWithUser([FromBody] KoiFishCreationDto koiFishCreationDto, string userId)
     {
-        await _koiFishService.AddKoiFishWithUser(koiFishCreationDto, userId);
-        return CreatedAtAction(nameof(GetKoiFishs), koiFishCreationDto);
+        var koiFish = await _koiFishService.AddKoiFishWithUser(koiFishCreationDto, userId);
+        return CreatedAtAction(nameof(GetKoiFishs), koiFish);
     }
 
     /// <summary>
