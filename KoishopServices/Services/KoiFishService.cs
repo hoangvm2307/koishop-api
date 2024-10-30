@@ -40,7 +40,7 @@ public class KoiFishService : IKoiFishService
         }
         if (!new[] { KoiFishStatus.AVAILABLE, KoiFishStatus.SOLD, KoiFishStatus.RESERVED }.Contains(koifishCreationDto.Status))
         {
-            throw new ValidationException(ExceptionConstants.INVALID_KOIFISH_TYPE);
+            throw new ValidationException(ExceptionConstants.INVALID_KOIFISH_STATUS);
         }
         if (!new[] { KoiFishType.PUREIMPORTED, KoiFishType.HYBRIDF1, KoiFishType.PUREVIETNAMESE }.Contains(koifishCreationDto.Type))
         {
@@ -57,7 +57,7 @@ public class KoiFishService : IKoiFishService
         await _koifishRepository.AddAsync(koifish);
     }
 
-    public async Task AddKoiFishWithUser(KoiFishCreationDto koifishCreationDto, string userId)
+    public async Task<KoiFishDto> AddKoiFishWithUser(KoiFishCreationDto koifishCreationDto, string userId)
     {
         var user = await _userManager.FindByIdAsync(koifishCreationDto.UserId.Value.ToString());
         if (user == null)
@@ -90,6 +90,7 @@ public class KoiFishService : IKoiFishService
         koifish.CreatedBy = userId;
 
         await _koifishRepository.AddAsync(koifish);
+        return _mapper.Map<KoiFishDto>(koifish);
     }
 
     public async Task<KoiFishDto> GetKoiFishById(int id)
