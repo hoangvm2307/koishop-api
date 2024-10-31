@@ -9,6 +9,7 @@ using KoishopServices.Common.Pagination;
 using KoishopServices.Dtos.Order;
 using KoishopServices.Interfaces;
 using KoishopServices.Interfaces.Third_Party;
+using MailKit.Search;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -407,5 +408,65 @@ public class OrderService : IOrderService
                data: result.MapToOrderDtoList(_mapper, users, koifishName));
     }
 
+    public async Task<Dictionary<int, OrderRevenueDto>> GetRevenueOfYear(int year, CancellationToken cancellationToken)
+    {
+        Dictionary<int, OrderRevenueDto> result = new Dictionary<int, OrderRevenueDto>();
+        decimal revenueFromKoiShop = 0;
+        decimal revenueFromCommission = 0;
+        int totalCommissionOrders = 0;
+        int completedOrders = 0;
+        for (int i = 1; i <= 13; i++)
+        {
+            result.Add(i, new OrderRevenueDto());
+        }
+        // status khác pending vs cancelled -> Order hoàn thành gòi -> cộng vô revenue dc
+        var orderList = await _orderRepository.FindAllAsync(x => x.isDeleted == false 
+            && x.DateModified.Year == year 
+            && (x.Status != OrderStatus.PENDING && x.Status != OrderStatus.CANCELLED),
+            query => query.Include(order => order.OrderItems), cancellationToken); 
+
+        // làm nhưng mà kh chác đúng kh nựa =))))
+        foreach (var order in orderList)
+        {
+            if (order.OrderItems != null)
+            {
+                foreach (var orderItem in order.OrderItems)
+                {
+                    if (orderItem.Type == OrderItemType.CONSIGNMENT_ONLINE && orderItem.isDeleted == false)
+                    {
+                        decimal commission = orderItem.Price * CostConstant.COMMISSION_CHARGE;
+                        if (order.OrderItems.Count > 10)
+                        {
+                            commission *= (1 - CostConstant.WHOLESALE_DISCOUNT);
+                        }
+                        result[order.DateModified.Month].RevenueFromCommission += commission;
+                        result[order.DateModified.Month].TotalCommissionOrders++;
+
+                        revenueFromCommission += commission;
+                        totalCommissionOrders++;
+                    }
+                    else if (orderItem.Type == OrderItemType.SHOP_OWNER && orderItem.isDeleted == false)
+                    {
+                        decimal revenue = orderItem.Price;
+                        if (order.OrderItems.Count > 10)
+                        {
+                            revenue *= (1 - CostConstant.WHOLESALE_DISCOUNT);
+                        }
+                        result[order.DateModified.Month].RevenueFromKoiShop += revenue;
+
+                        revenueFromKoiShop += revenue;
+                    }
+                }
+            }
+            result[order.DateModified.Month].CompletedOrders++;
+            completedOrders++;
+        }
+        result[13].RevenueFromCommission = revenueFromCommission;
+        result[13].TotalCommissionOrders = totalCommissionOrders;
+        result[13].CompletedOrders = completedOrders;
+        result[13].RevenueFromKoiShop = revenueFromKoiShop;
+        return result;
+
+    }
 
 }

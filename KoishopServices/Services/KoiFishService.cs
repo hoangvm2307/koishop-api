@@ -55,7 +55,7 @@ public class KoiFishService : IKoiFishService
         await _koifishRepository.AddAsync(koifish);
     }
 
-    public async Task AddKoiFishWithUser(KoiFishCreationDto koifishCreationDto, string userId)
+    public async Task<KoiFishDto> AddKoiFishWithUser(KoiFishCreationDto koifishCreationDto, string userId)
     {
         var user = await _userManager.FindByIdAsync(userId);
         if (user == null)
@@ -88,6 +88,7 @@ public class KoiFishService : IKoiFishService
         koifish.CreatedBy = userId;
 
         await _koifishRepository.AddAsync(koifish);
+        return _mapper.Map<KoiFishDto>(koifish);
     }
 
     public async Task<KoiFishDto> GetKoiFishById(int id)
