@@ -6,6 +6,7 @@ using KoishopRepositories.Interfaces;
 using KoishopServices.Common.Exceptions;
 using KoishopServices.Common.Interface;
 using KoishopServices.Common.Pagination;
+using KoishopServices.Dtos.Dashboard;
 using KoishopServices.Dtos.Order;
 using KoishopServices.Interfaces;
 using KoishopServices.Interfaces.Third_Party;
@@ -467,6 +468,24 @@ public class OrderService : IOrderService
         result[13].RevenueFromKoiShop = revenueFromKoiShop;
         return result;
 
+    }
+
+    public async Task<IEnumerable<OrderFavCustomer>> GetTotalOrderByUser()
+    {
+        var orders = await _orderRepository.GetAllAsync();
+        
+        var favCustomers = orders
+            .Where(o => o.UserId.HasValue) 
+            .GroupBy(o => o.UserId.Value)  
+            .Select(group => new OrderFavCustomer
+            {
+                UserId = group.Key,
+                TotalOrders = group.Count(),
+            })
+            .OrderByDescending(o => o.TotalOrders) 
+            .ToList();
+
+        return favCustomers;
     }
 
 }
