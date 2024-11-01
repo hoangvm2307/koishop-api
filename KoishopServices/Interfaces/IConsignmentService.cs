@@ -1,4 +1,5 @@
 ﻿using DTOs.Consignment;
+using KoishopServices.Dtos.Dashboard;
 
 namespace KoishopServices.Interfaces;
 
@@ -10,4 +11,6 @@ public interface IConsignmentService
     Task AddConsignment(ConsignmentCreationDto consignmentCreationDto);
     Task<bool> UpdateConsignment(int id, ConsignmentUpdateDto consignmentUpdateDto);
     Task<bool> RemoveConsignment(int id);
+    Task<TotalConsignment> GetTotalConsignmentByType();
+    Task<IEnumerable<TotalConsignmentByMonth>> GetMonthlyTotalConsignmentAsync();
 }
