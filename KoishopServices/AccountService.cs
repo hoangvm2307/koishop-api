@@ -68,6 +68,7 @@ namespace KoishopServices
 
             var userDtos = users.Select(user => new UserDto
             {
+                Id = user.Id,
                 Email = user.Email,
                 UserName = user.UserName
             }).ToList();
