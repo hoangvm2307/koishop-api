@@ -52,4 +52,11 @@ public class OrderItemController : BaseApiController
             return NotFound();
         return NoContent();
     }
+
+    [HttpGet("order/{orderId}")]
+    public async Task<ActionResult<IEnumerable<OrderItemDto>>> GetOrderItemByOrderId(int orderId)
+    {
+        var orderItem = await _orderItemService.GetOrderItemByOrderId(orderId);
+        return Ok(orderItem);
+    }
 }

@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
 using DTOs.FishCare;
 using KoishopBusinessObjects;
+using KoishopBusinessObjects.Constants;
 using KoishopRepositories.Interfaces;
 using KoishopServices.Interfaces;
+using System.Linq;
 
 namespace KoishopServices.Services;
 
@@ -18,7 +20,15 @@ public class FishCareService : IFishCareService
     }
     public async Task AddFishCare(FishCareCreationDto fishCareCreationDto)
     {
-        //TODO: Add validation before create and mapping
+        if (fishCareCreationDto == null)
+            throw new ArgumentException("FishCareCreationDto cannot be null.");
+
+        var validStatuses = new[] { FishCareStatus.ACTIVE, FishCareStatus.COMPLETED, FishCareStatus.CANCELLED };
+        if (!validStatuses.Contains(fishCareCreationDto.Status))
+        {
+            throw new ArgumentException("Invalid status provided.");
+        }
+
         var fishCare = _mapper.Map<FishCare>(fishCareCreationDto);
         await _fishCareRepository.AddAsync(fishCare);
     }

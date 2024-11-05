@@ -1,4 +1,5 @@
 using DTOs.AccountDtos;
+using KoishopBusinessObjects;
 using KoishopServices;
 using Microsoft.AspNetCore.Mvc;
 
@@ -62,6 +63,16 @@ namespace KoishopWebAPI.Controllers
             });
 
             return Ok(new JsonResponse<string>("Logged out successfully"));
+        }
+
+        /// <summary>
+        /// Get All Users
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        public async Task<ActionResult<List<UserDto>>> GetUsers()
+        {
+            return await _accountService.GetUsers();
         }
     }
 }

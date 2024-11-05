@@ -7,6 +7,7 @@ public interface IOrderItemService
 {
     Task<IEnumerable<OrderItemDto>> GetListOrderItem();
     Task<OrderItemDto> GetOrderItemById(int id);
+    Task<IEnumerable<OrderItemDto>> GetOrderItemByOrderId(int orderId);
     Task AddOrderItem(OrderItemCreationDto orderItemCreationDto);
     Task<bool> UpdateOrderItem(int id, OrderItemUpdateDto orderItemUpdateDto);
     Task<bool> RemoveOrderItem(int id);

@@ -62,5 +62,17 @@ namespace KoishopServices
             };
         }
 
+        public async Task<List<UserDto>> GetUsers()
+        {
+            var users = await _userManager.GetUsersInRoleAsync("Customer");
+
+            var userDtos = users.Select(user => new UserDto
+            {
+                Email = user.Email,
+                UserName = user.UserName
+            }).ToList();
+
+            return userDtos;
+        }
     }
 }

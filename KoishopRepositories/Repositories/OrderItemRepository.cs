@@ -20,4 +20,11 @@ public class OrderItemRepository : GenericRepository<OrderItem>, IOrderItemRepos
                 .Include(e => e.KoiFish)
                 .AsTracking().ToListAsync();    
     }
+
+    public async Task<IEnumerable<OrderItem>> GetOrdersItemsByOrderId(int orderId)
+    {
+        return await _context.OrderItems
+                .Where(e => (e.isDeleted == false || e.isDeleted == null) && e.OrderId.Equals(orderId))
+                .ToListAsync();
+    }
 }
