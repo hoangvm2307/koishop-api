@@ -91,12 +91,12 @@ builder.Services.AddAuthorization(options =>
 builder.Services.AddControllers(
                 opt =>
                 {
-                    opt.Filters.Add<ExceptionFilter>();
+                  opt.Filters.Add<ExceptionFilter>();
 
                 })
     .AddJsonOptions(opt =>
     {
-        opt.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+      opt.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
     });
 builder.Services.ConfigureProblemDetails();
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());

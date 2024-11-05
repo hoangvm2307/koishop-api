@@ -16,7 +16,7 @@ namespace KoishopServices
     {
       _userManager = userManager;
       _config = config;
-    }
+    } 
 
     public async Task<string> GenerateToken(User user)
     {

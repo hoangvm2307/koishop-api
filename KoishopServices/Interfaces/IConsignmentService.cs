@@ -10,4 +10,6 @@ public interface IConsignmentService
     Task AddConsignment(ConsignmentCreationDto consignmentCreationDto);
     Task<bool> UpdateConsignment(int id, ConsignmentUpdateDto consignmentUpdateDto);
     Task<bool> RemoveConsignment(int id);
+    Task<bool> CancelConsignment(int id);
+    
 }
