@@ -1,4 +1,5 @@
 ﻿using DTOs.Consignment;
+using KoishopServices.Dtos.Consignment;
 using KoishopServices.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -74,6 +75,22 @@ public class ConsignmentController : BaseApiController
     public async Task<ActionResult> UpdateConsignment(int id, ConsignmentUpdateDto consignmentUpdateDto)
     {
         var isUpdated = await _consignmentService.UpdateConsignment(id, consignmentUpdateDto);
+        if (!isUpdated)
+            return NotFound();
+        return NoContent();
+    }
+
+
+    /// <summary>
+    /// Update consignment's information
+    /// </summary>
+    /// <param name="id"></param>
+    /// <param name="consignmentStatusUpdateDto"></param>
+    /// <returns></returns>
+    [HttpPatch("{id}")]
+    public async Task<ActionResult> UpdateStatusConsignment(int id, ConsignmentStatusUpdateDto consignmentStatusUpdateDto)
+    {
+        var isUpdated = await _consignmentService.UpdateStatusConsigment(id, consignmentStatusUpdateDto);
         if (!isUpdated)
             return NotFound();
         return NoContent();

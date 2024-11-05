@@ -3,6 +3,7 @@ using DTOs.Consignment;
 using KoishopBusinessObjects;
 using KoishopBusinessObjects.Constants;
 using KoishopRepositories.Interfaces;
+using KoishopServices.Dtos.Consignment;
 using KoishopServices.Dtos.Dashboard;
 using KoishopServices.Interfaces;
 using Microsoft.IdentityModel.Tokens;
@@ -85,6 +86,27 @@ public class ConsignmentService : IConsignmentService
         if (exist == null)
             return false;
         await _consignmentRepository.DeleteAsync(exist);
+        return true;
+    }
+
+    public async Task<bool> UpdateStatusConsigment(int id, ConsignmentStatusUpdateDto consignmentStatusUpdateDto)
+    {
+        if (consignmentStatusUpdateDto == null)
+            return false;
+
+        var validStatuses = new[] { ConsignmentStatus.PENDING, ConsignmentStatus.APPROVED, ConsignmentStatus.REJECTED, ConsignmentStatus.COMPLETED };
+        if (!validStatuses.Contains(consignmentStatusUpdateDto.Status))
+        {
+            throw new ArgumentException("Invalid status provided.");
+        }
+
+        var existingConsignment = await _consignmentRepository.GetByIdAsync(id);
+        if (existingConsignment == null)
+            return false;
+
+        _mapper.Map(consignmentStatusUpdateDto, existingConsignment);
+        await _consignmentRepository.UpdateAsync(existingConsignment);
+
         return true;
     }
 

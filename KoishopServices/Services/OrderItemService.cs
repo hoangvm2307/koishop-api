@@ -78,4 +78,10 @@ public class OrderItemService  : IOrderItemService
 
         return favOrigins;
     }
+
+    public async Task<IEnumerable<OrderItemDto>> GetOrderItemByOrderId(int orderId)
+    {
+        var orderItems = await _orderItemRepository.GetOrdersItemsByOrderId(orderId);
+        return _mapper.Map<IEnumerable<OrderItemDto>>(orderItems);
+    }
 }
