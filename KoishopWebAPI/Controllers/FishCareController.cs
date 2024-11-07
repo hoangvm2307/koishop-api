@@ -50,6 +50,20 @@ public class FishCareController : BaseApiController
     }
 
     /// <summary>
+    /// Get detail fishcare's information
+    /// </summary>
+    /// <param name="fishId"></param>
+    /// <returns></returns>
+    [HttpGet("fish/{fishId}")]
+    public async Task<ActionResult<List<FishCareDto>>> GetFishCareByFishId(int fishId)
+    {
+        var fishCares = await _fishCareService.GetFishCareByFishId(fishId);
+        if (fishCares == null)
+            return NotFound();
+        return Ok(fishCares);
+    }
+
+    /// <summary>
     /// Update fishcare's information
     /// </summary>
     /// <param name="id"></param>

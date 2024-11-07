@@ -29,7 +29,10 @@ public class FishCareService : IFishCareService
             throw new ArgumentException("Invalid status provided.");
         }
 
+
         var fishCare = _mapper.Map<FishCare>(fishCareCreationDto);
+        fishCare.StartDate = fishCareCreationDto.StartDate.ToUniversalTime();
+        fishCare.EndDate = fishCareCreationDto.EndDate.ToUniversalTime();
         await _fishCareRepository.AddAsync(fishCare);
     }
 
@@ -39,6 +42,13 @@ public class FishCareService : IFishCareService
         if (fishCare == null)
             return null;
         return _mapper.Map<FishCareDto>(fishCare);
+    }
+    public async Task<List<FishCareDto>> GetFishCareByFishId(int fishId)
+    {
+        var fishCare = await _fishCareRepository.GetFishCareByFishId(fishId);
+        if (fishCare == null)
+            return null;
+        return _mapper.Map<List<FishCareDto>>(fishCare);
     }
 
     public async Task<IEnumerable<FishCareDto>> GetListFishCare()
