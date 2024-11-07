@@ -60,7 +60,6 @@ namespace KoishopWebAPI.Controllers
 
             var user = await _accountService.AddStaff(registerDto);
 
-            Response.Cookies.Append("token", user.Token, new CookieOptions { Secure = true, SameSite = SameSiteMode.None, Expires = DateTime.Now.AddDays(7) });
 
             return Ok(user);
         }
