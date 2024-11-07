@@ -49,6 +49,23 @@ namespace KoishopWebAPI.Controllers
         }
 
         /// <summary>
+        /// Register account for staff
+        /// </summary>
+        /// <param name="registerDto"></param>
+        /// <returns></returns>
+        [HttpPost("register-staff")]
+        public async Task<ActionResult<UserDto>> AddStaff([FromBody] RegisterDto registerDto)
+        {
+            if (registerDto == null || !ModelState.IsValid) return BadRequest("Invalid register request");
+
+            var user = await _accountService.AddStaff(registerDto);
+
+            Response.Cookies.Append("token", user.Token, new CookieOptions { Secure = true, SameSite = SameSiteMode.None, Expires = DateTime.Now.AddDays(7) });
+
+            return user;
+        }
+
+        /// <summary>
         /// Logout from the system
         /// </summary>
         /// <returns></returns>
@@ -66,13 +83,48 @@ namespace KoishopWebAPI.Controllers
         }
 
         /// <summary>
-        /// Get All Users
+        /// Get All Customers
         /// </summary>
         /// <returns></returns>
         [HttpGet]
         public async Task<ActionResult<List<UserDto>>> GetUsers()
         {
             return await _accountService.GetUsers();
+        }
+
+        /// <summary>
+        /// Get All Staffs
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("list-staff")]
+        public async Task<ActionResult<List<UserDto>>> GetStaffs()
+        {
+            return await _accountService.GetStaffs();
+        }
+
+        [HttpPut("{id}")]
+        // [Authorize(Roles = "Administrator")]
+        public async Task<ActionResult> UpdateUser(int id, UserUpdateDto userDto)
+        {
+            try
+            {
+                await _accountService.UpdateUserAsync(id, userDto);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            return NoContent();
+        }
+
+        [HttpDelete("{id}")]
+        // [Authorize(Roles = "Administrator")]
+        public async Task<ActionResult> DeleteUser(string id)
+        {
+            var isDeleted = await _accountService.RemoveUser(id);
+            if (!isDeleted)
+            return NotFound();
+            return NoContent();
         }
     }
 }

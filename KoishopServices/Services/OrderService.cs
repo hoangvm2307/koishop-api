@@ -199,7 +199,6 @@ public class OrderService : IOrderService
             }
         }
 
-        //TODO: tính lại total price của order - Đợi Ngọc
         decimal totalAmount = 0;
         foreach (var item in existingOrder.OrderItems)
         {
