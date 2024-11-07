@@ -54,6 +54,7 @@ public class ConsignmentService : IConsignmentService
                 consignment.Price = consignment.ConsignmentItems.Count >= 10 ? totalOnlineFee - totalOnlineFee * CostConstant.CONSIGNMENT_DISCOUNT : totalOnlineFee;
                 break;
         }
+        consignmentCreationDto.Status = ConsignmentStatus.PENDING;
 
         await _consignmentRepository.AddAsync(consignment);
     }
