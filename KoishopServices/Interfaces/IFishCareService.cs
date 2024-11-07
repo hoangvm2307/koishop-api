@@ -9,4 +9,5 @@ public interface IFishCareService
     Task AddFishCare(FishCareCreationDto fishCareCreationDto);
     Task<bool> UpdateFishCare(int id, FishCareUpdateDto fishCareUpdateDto);
     Task<bool> RemoveFishCare(int id);
+    Task<List<FishCareDto>> GetFishCareByFishId(int fishId);
 }

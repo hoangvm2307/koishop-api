@@ -3,7 +3,7 @@
 public class FishCareCreationDto
 {
     public DateTime StartDate { get; set; }
-    public DateTime? EndDate { get; set; }
+    public DateTime EndDate { get; set; }
     public string? CareInstructions { get; set; }
     public string? Status { get; set; }
     public int CareId { get; set; }
