@@ -122,4 +122,11 @@ public class OrderController : BaseApiController
             return BadRequest();
         return NoContent();
     }
+
+    [HttpGet("revenue/{year}")]
+    public async Task<ActionResult> GetRevenue([FromRoute] int year, CancellationToken cancellationToken)
+    {
+        var revenue = await _orderService.GetRevenueOfYear(year, cancellationToken);
+        return Ok(revenue);
+    }
 }

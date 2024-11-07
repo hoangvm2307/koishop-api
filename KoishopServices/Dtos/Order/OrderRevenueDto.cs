@@ -8,8 +8,9 @@ namespace KoishopServices.Dtos.Order
 {
     public class OrderRevenueDto
     {
-        public decimal Revenue { get; set; }
-        public int TotalReservedOrder { get; set; }
+        public decimal RevenueFromKoiShop { get; set; }
+        public decimal RevenueFromCommission {  get; set; }
+        public int TotalCommissionOrders { get; set; }
         public int CompletedOrders { get; set; }
     }
 }

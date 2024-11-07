@@ -3,7 +3,10 @@ using DTOs.Consignment;
 using KoishopBusinessObjects;
 using KoishopBusinessObjects.Constants;
 using KoishopRepositories.Interfaces;
+using KoishopServices.Dtos.Consignment;
+using KoishopServices.Dtos.Dashboard;
 using KoishopServices.Interfaces;
+using Microsoft.IdentityModel.Tokens;
 
 namespace KoishopServices.Services;
 
@@ -87,6 +90,26 @@ public class ConsignmentService : IConsignmentService
     var result = _mapper.Map<List<ConsignmentDto>>(consignments);
     return result;
   }
+  public async Task<bool> UpdateStatusConsigment(int id, ConsignmentStatusUpdateDto consignmentStatusUpdateDto)
+  {
+    if (consignmentStatusUpdateDto == null)
+      return false;
+
+    var validStatuses = new[] { ConsignmentStatus.PENDING, ConsignmentStatus.APPROVED, ConsignmentStatus.REJECTED, ConsignmentStatus.COMPLETED };
+    if (!validStatuses.Contains(consignmentStatusUpdateDto.Status))
+    {
+      throw new ArgumentException("Invalid status provided.");
+    }
+
+    var existingConsignment = await _consignmentRepository.GetByIdAsync(id);
+    if (existingConsignment == null)
+      return false;
+
+    _mapper.Map(consignmentStatusUpdateDto, existingConsignment);
+    await _consignmentRepository.UpdateAsync(existingConsignment);
+
+    return true;
+  }
 
   public async Task<IEnumerable<ConsignmentDto>> GetListConsignmentByUserId(int userId)
   {
@@ -134,5 +157,51 @@ public class ConsignmentService : IConsignmentService
     _mapper.Map(consignmentUpdateDto, existingConsignment);
     await _consignmentRepository.UpdateAsync(existingConsignment);
     return true;
+  }
+
+  public async Task<TotalConsignment> GetTotalConsignmentByType()
+  {
+    var consignments = await _consignmentRepository.GetAllAsync();
+
+    var totalConsignment = new TotalConsignment
+    {
+      TotalConsignmentOnline = consignments
+            .Count(e => !string.IsNullOrEmpty(e.ConsignmentType) &&
+                    e.ConsignmentType == ConsignmentType.ONLINE),
+
+      TotalConsignmentOffline = consignments
+            .Count(e => !string.IsNullOrEmpty(e.ConsignmentType) &&
+                    e.ConsignmentType == ConsignmentType.OFFLINE)
+    };
+
+    return totalConsignment;
+  }
+
+  public async Task<IEnumerable<TotalConsignmentByMonth>> GetMonthlyTotalConsignmentAsync()
+  {
+    var endDate = DateTime.UtcNow;
+    var startDate = endDate.AddMonths(-12 + 1).Date.AddDays(1 - endDate.Day);
+
+
+    var consignments = await _consignmentRepository.GetAllAsync();
+
+    // Filter and process in memory
+    var filteredSubscriptions = consignments
+        .Where(u => u.DateCreated >= startDate && u.DateCreated <= endDate)
+        .OrderBy(u => u.DateCreated)
+        .ToList();
+
+
+    var dataStatistics = filteredSubscriptions
+        .GroupBy(u => new { u.DateCreated.Year, u.DateCreated.Month })
+        .OrderBy(g => g.Key.Year).ThenBy(g => g.Key.Month)
+        .Select(g => new TotalConsignmentByMonth
+        {
+          Date = new DateTime(g.Key.Year, g.Key.Month, 1),
+          TotalConsignment = g.Count(),
+        })
+        .ToList();
+
+    return dataStatistics;
   }
 }

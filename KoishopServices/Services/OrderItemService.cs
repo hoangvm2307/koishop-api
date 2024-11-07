@@ -2,7 +2,9 @@
 using DTOs.OrderItem;
 using KoishopBusinessObjects;
 using KoishopRepositories.Interfaces;
+using KoishopServices.Dtos.Dashboard;
 using KoishopServices.Interfaces;
+using Microsoft.IdentityModel.Tokens;
 
 namespace KoishopServices.Services;
 
@@ -57,5 +59,29 @@ public class OrderItemService  : IOrderItemService
         _mapper.Map(orderItemUpdateDto, existingOrderItem);
         await _orderItemRepository.UpdateAsync(existingOrderItem);
         return true;
+    }
+
+    public async Task<IEnumerable<FavOrigin>> GetTotalOrderByOrigin()
+    {
+        var orderItems = await _orderItemRepository.GetAllOrderitemAsync();
+        
+        var favOrigins = orderItems
+            .Where(o => !o.KoiFish.Origin.IsNullOrEmpty()) 
+            .GroupBy(o => o.KoiFish.Origin.Trim().ToLower())  
+            .Select(group => new FavOrigin
+            {
+                OriginName = group.Key,
+                TotalFish = group.Count(),
+            })
+            .OrderByDescending(o => o.TotalFish) 
+            .ToList();
+
+        return favOrigins;
+    }
+
+    public async Task<IEnumerable<OrderItemDto>> GetOrderItemByOrderId(int orderId)
+    {
+        var orderItems = await _orderItemRepository.GetOrdersItemsByOrderId(orderId);
+        return _mapper.Map<IEnumerable<OrderItemDto>>(orderItems);
     }
 }
