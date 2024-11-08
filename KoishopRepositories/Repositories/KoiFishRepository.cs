@@ -24,6 +24,7 @@ public class KoiFishRepository : GenericRepository<KoiFish>, IKoiFishRepository
             .Include(fish => fish.Breed)
             .Include(fish => fish.FishCare)
             .Include(fish => fish.Ratings)
+            .Where(c => c.isDeleted == false)
             .AsQueryable();
     }
 
