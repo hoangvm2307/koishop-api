@@ -38,7 +38,7 @@ public class KoiFishService : IKoiFishService
     }
     if (!new[] { KoiFishStatus.AVAILABLE, KoiFishStatus.SOLD, KoiFishStatus.RESERVED }.Contains(koifishCreationDto.Status))
     {
-      throw new ValidationException(ExceptionConstants.INVALID_KOIFISH_TYPE);
+      throw new ValidationException(ExceptionConstants.INVALID_KOIFISH_STATUS);
     }
     if (!new[] { KoiFishType.PUREIMPORTED, KoiFishType.HYBRIDF1, KoiFishType.PUREVIETNAMESE }.Contains(koifishCreationDto.Type))
     {
